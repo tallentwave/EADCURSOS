@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $v = trim($_POST['video_url'] ?? '');
         if ($v !== '' && !video_embed($v)) flash('err', 'Link de vídeo inválido: use YouTube ou Vimeo.');
         else {
-            q('UPDATE lessons SET title=?, description=?, video_url=?, duration_min=?, is_free=? WHERE id=?',
-                [trim($_POST['title']) ?: $l['title'], trim($_POST['description'] ?? ''), $v, max(0, (int)$_POST['duration_min']), isset($_POST['is_free']) ? 1 : 0, $id]);
+            q('UPDATE lessons SET title=?, description=?, video_url=?, duration_min=?, duration_sec=?, is_free=? WHERE id=?',
+                [trim($_POST['title']) ?: $l['title'], trim($_POST['description'] ?? ''), $v, max(0, (int)$_POST['duration_min']), max(0, (int)($_POST['duration_sec'] ?? 0)), isset($_POST['is_free']) ? 1 : 0, $id]);
             flash('ok', 'Aula salva.');
         }
     } elseif ($a === 'upload') {
@@ -42,7 +42,8 @@ require ROOT . '/app/views/admin_header.php';
 <label>Título</label><input type="text" name="title" value="<?= e($l['title']) ?>" required>
 <label>Link do vídeo (YouTube ou Vimeo)</label><input type="url" name="video_url" value="<?= e($l['video_url']) ?>">
 <label>Descrição</label><textarea name="description"><?= e($l['description']) ?></textarea>
-<div class="grid2"><div><label>Duração (min)</label><input type="number" name="duration_min" min="0" value="<?= (int)$l['duration_min'] ?>"></div></div>
+<div class="grid2"><div><label>Duração aproximada (min)</label><input type="number" name="duration_min" min="0" value="<?= (int)$l['duration_min'] ?>"></div>
+<div><label>Duração exata (segundos) — define o mínimo de 90%</label><input type="number" name="duration_sec" min="0" value="<?= (int)$l['duration_sec'] ?>"><div class="hint">Dica: abra a aula como administrador e dê play por alguns segundos — a duração exata é gravada automaticamente.</div></div></div>
 <label class="check"><input type="checkbox" name="is_free" <?= $l['is_free'] ? 'checked' : '' ?>> Aula gratuita (visível sem comprar o curso)</label><br><button class="btn">Salvar</button></form>
 
 <div class="formbox"><h2 style="margin:14px 0 6px">Materiais (PDF)</h2>

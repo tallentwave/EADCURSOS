@@ -5,7 +5,7 @@ define('MP_API', getenv('MP_API_BASE') ?: 'https://api.mercadopago.com');
 
 function mp_request(string $method, string $path, ?array $body = null): array
 {
-    $token = setting('mp_access_token');
+    $token = setting_secret('mp_access_token');
     if ($token === '') throw new RuntimeException('Mercado Pago não configurado.');
     $ch = curl_init(MP_API . $path);
     $headers = ['Authorization: Bearer ' . $token, 'Content-Type: application/json'];
@@ -29,10 +29,10 @@ function mp_request(string $method, string $path, ?array $body = null): array
 }
 
 /** Cria o pedido e devolve a URL do checkout do Mercado Pago (PIX, cartão, boleto). */
-function create_checkout(array $user, array $course): string
+function create_checkout(array $user, array $course, float $amount, ?int $couponId = null, float $discount = 0): string
 {
-    q('INSERT INTO orders (user_id, course_id, amount, status, created_at) VALUES (?, ?, ?, "pending", ?)',
-        [$user['id'], $course['id'], $course['price'], now()]);
+    q('INSERT INTO orders (user_id, course_id, amount, status, coupon_id, discount, created_at) VALUES (?, ?, ?, "pending", ?, ?, ?)',
+        [$user['id'], $course['id'], $amount, $couponId, $discount, now()]);
     $orderId = (int)db()->lastInsertId();
     $back = url('retorno.php?pedido=' . $orderId);
 
@@ -42,7 +42,7 @@ function create_checkout(array $user, array $course): string
             'title' => $course['title'],
             'quantity' => 1,
             'currency_id' => 'BRL',
-            'unit_price' => (float)$course['price'],
+            'unit_price' => $amount,
         ]],
         'payer' => ['name' => $user['name'], 'email' => $user['email']],
         'external_reference' => (string)$orderId,
@@ -84,6 +84,7 @@ function process_payment(string $paymentId): ?array
         if ($order['status'] !== 'paid') {
             q('UPDATE orders SET status = "paid", mp_payment_id = ?, paid_at = ? WHERE id = ?', [$paymentId, now(), $orderId]);
             grant_access((int)$order['user_id'], (int)$order['course_id'], 'purchase', $orderId);
+            mail_purchase($orderId);
         }
     } elseif (in_array($status, ['refunded', 'charged_back', 'cancelled'], true)) {
         if ($order['status'] === 'paid' && $status !== 'cancelled') {
@@ -99,7 +100,7 @@ function process_payment(string $paymentId): ?array
 /** Valida x-signature do webhook quando o segredo está configurado. */
 function webhook_signature_ok(string $dataId): bool
 {
-    $secret = setting('mp_webhook_secret');
+    $secret = setting_secret('mp_webhook_secret');
     if ($secret === '') return true; // validação extra opcional; a confirmação real é feita via API
     $sig = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
     $reqId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';

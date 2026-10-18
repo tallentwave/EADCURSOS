@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             [$name, $email, password_hash($pass, PASSWORD_DEFAULT), now()]);
         $u = q_one('SELECT * FROM users WHERE id = ?', [db()->lastInsertId()]);
         login_user($u);
+        mail_welcome($u);
         redirect('home.php');
     }
 }

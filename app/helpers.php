@@ -131,9 +131,23 @@ function video_embed(string $u): ?string
     return null;
 }
 
-function mail_send(string $to, string $subject, string $body): bool
+// ---------- Segredos criptografados no banco (AES-256-GCM, chave derivada do app_key) ----------
+function secret_encrypt(string $plain): string
 {
-    $from = setting('mail_from', 'no-reply@' . preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? 'localhost'));
-    $headers = "From: " . site_name() . " <$from>\r\nContent-Type: text/plain; charset=UTF-8\r\n";
-    return @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
+    if ($plain === '') return '';
+    $key = hash('sha256', APP_KEY, true);
+    $iv = random_bytes(12);
+    $ct = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+    return 'enc:' . base64_encode($iv . $tag . $ct);
 }
+function secret_decrypt(string $stored): string
+{
+    if (!str_starts_with($stored, 'enc:')) return $stored; // valores antigos em texto puro
+    $raw = base64_decode(substr($stored, 4), true);
+    if ($raw === false || strlen($raw) < 29) return '';
+    $key = hash('sha256', APP_KEY, true);
+    $pt = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16));
+    return $pt === false ? '' : $pt;
+}
+function setting_secret(string $k): string { return secret_decrypt(setting($k)); }
+function set_secret(string $k, string $v): void { set_setting($k, secret_encrypt($v)); }

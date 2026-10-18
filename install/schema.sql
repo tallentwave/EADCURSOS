@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   description TEXT NULL,
   video_url VARCHAR(255) NOT NULL DEFAULT '',
   duration_min INT NOT NULL DEFAULT 0,
+  duration_sec INT NOT NULL DEFAULT 0,
   position INT NOT NULL DEFAULT 0,
   is_free TINYINT(1) NOT NULL DEFAULT 0,
   FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
@@ -56,6 +57,8 @@ CREATE TABLE IF NOT EXISTS orders (
   status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'pending',
   mp_preference_id VARCHAR(80) NULL,
   mp_payment_id VARCHAR(40) NULL,
+  coupon_id INT UNSIGNED NULL,
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL,
   paid_at DATETIME NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -65,7 +68,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NOT NULL,
   course_id INT UNSIGNED NOT NULL,
-  source ENUM('purchase','admin') NOT NULL DEFAULT 'admin',
+  source ENUM('purchase','admin','voucher') NOT NULL DEFAULT 'admin',
   order_id INT UNSIGNED NULL,
   created_at DATETIME NOT NULL,
   expires_at DATETIME NULL,
@@ -123,4 +126,37 @@ CREATE TABLE IF NOT EXISTS password_resets (
 CREATE TABLE IF NOT EXISTS settings (
   k VARCHAR(60) PRIMARY KEY,
   v TEXT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS coupons (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(40) NOT NULL UNIQUE,
+  type ENUM('percent','fixed') NOT NULL DEFAULT 'percent',
+  value DECIMAL(10,2) NOT NULL,
+  course_id INT UNSIGNED NULL,
+  max_uses INT UNSIGNED NULL,
+  expires_at DATETIME NULL,
+  active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS vouchers (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(20) NOT NULL UNIQUE,
+  course_id INT UNSIGNED NOT NULL,
+  batch VARCHAR(80) NOT NULL DEFAULT '',
+  expires_at DATETIME NULL,
+  redeemed_by INT UNSIGNED NULL,
+  redeemed_at DATETIME NULL,
+  created_at DATETIME NOT NULL,
+  KEY idx_batch (batch),
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  FOREIGN KEY (redeemed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS lesson_watch (
+  user_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NOT NULL,
+  progress_sec DOUBLE NOT NULL DEFAULT 0,
+  last_ping DOUBLE NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, lesson_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

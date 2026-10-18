@@ -36,6 +36,22 @@
     });
   }
 
+  // pré-visualização do cupom
+  var bc = document.getElementById('btn-coupon');
+  if (bc) {
+    bc.addEventListener('click', function () {
+      var msg = document.getElementById('coupon-msg'), box = document.getElementById('price-box');
+      var body = new URLSearchParams({ course_id: bc.getAttribute('data-course'), coupon: document.getElementById('coupon').value, _csrf: csrf });
+      fetch(bc.getAttribute('data-url'), { method: 'POST', body: body, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          msg.style.color = j.ok ? 'var(--ok)' : 'var(--danger)';
+          msg.textContent = j.msg || '';
+          box.textContent = j.ok && j.final ? j.final : box.getAttribute('data-price');
+        }).catch(function () { msg.textContent = 'Erro ao validar o cupom.'; });
+    });
+  }
+
   // responder comentário
   document.querySelectorAll('[data-reply]').forEach(function (a) {
     a.addEventListener('click', function (ev) {

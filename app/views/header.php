@@ -15,6 +15,7 @@
   <nav>
     <a href="<?= e(url('home.php')) ?>">Início</a>
     <a href="<?= e(url('home.php#meus-cursos')) ?>">Meus cursos</a>
+    <a href="<?= e(url('resgatar.php')) ?>">Resgatar voucher</a>
     <a href="<?= e(url('perfil.php')) ?>">Minha conta</a>
     <?php if ($u['role'] === 'admin'): ?><a class="gold" href="<?= e(url('admin/')) ?>">Admin</a><?php endif; ?>
   </nav>

@@ -12,6 +12,14 @@ if (!has_access($uid, $cid) && !$lesson['is_free']) {
     redirect('curso.php?id=' . $cid);
 }
 
+$isOwner = has_access($uid, $cid);
+$openMap = $isOwner ? open_map($uid, $cid) : [];
+if ($isOwner && !($openMap[(int)$lesson['id']] ?? false)) {
+    flash('err', 'Assista pelo menos 90% da aula anterior para liberar esta.');
+    $nl = next_lesson($uid, $cid);
+    redirect($nl && $nl['id'] != $lesson['id'] ? 'aula.php?id=' . $nl['id'] : 'curso.php?id=' . $cid);
+}
+
 // registra "visto por último" sem marcar como concluída (para "continuar assistindo")
 q('INSERT INTO progress (user_id, lesson_id, completed, updated_at) VALUES (?, ?, 0, ?)
    ON DUPLICATE KEY UPDATE updated_at = VALUES(updated_at)', [$uid, $lesson['id'], now()]);
@@ -43,24 +51,30 @@ function render_comment(array $cm, array $replies, bool $isReply = false): void 
 }
 
 $title = $lesson['title'];
+$withPlayer = (bool)$embed;
 require ROOT . '/app/views/header.php';
 ?>
 <div class="player-layout">
   <div>
     <?php if ($embed): ?>
-      <div class="video"><iframe src="<?= e($embed) ?>" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <div class="video" id="player-wrap"><div class="stage" id="player" data-lesson="<?= (int)$lesson['id'] ?>" data-src="<?= e(url('video.php?id=' . $lesson['id'])) ?>" data-ping="<?= e(url('watch.php')) ?>"><div class="msg">Carregando vídeo...</div></div></div>
+      <div class="watchbar" id="watchbar"><div class="track"><i id="watch-fill" style="width:<?= $isDone ? 100 : 0 ?>%"></i></div><span id="watch-status"><?= $isDone ? '&#10003; Aula concluída' : ($isOwner ? 'Assista pelo menos 90% para liberar a próxima aula' : 'Aula de degustação') ?></span></div>
     <?php else: ?>
       <div class="video empty">Vídeo não disponível para esta aula.</div>
     <?php endif; ?>
     <div class="lesson-head">
       <div><small style="color:var(--muted)"><?= e($lesson['module_title']) ?></small><h1><?= e($lesson['title']) ?></h1></div>
+      <?php if (!$embed): ?>
       <button id="btn-complete" class="btn <?= $isDone ? 'btn-ghost' : '' ?>" data-lesson="<?= (int)$lesson['id'] ?>" data-done="<?= $isDone ? 1 : 0 ?>"
-        data-url="<?= e(url('progresso.php')) ?>" data-next="<?= $next && (has_access($uid, $cid) || $next['is_free']) ? e(url('aula.php?id=' . $next['id'])) : '' ?>">
+        data-url="<?= e(url('progresso.php')) ?>" data-next="<?= $next && (!$isOwner || ($openMap[$next['id']] ?? true)) && ($isOwner || $next['is_free']) ? e(url('aula.php?id=' . $next['id'])) : '' ?>">
         <?= $isDone ? '&#10003; Aula concluída' : 'Marcar como concluída' ?></button>
+      <?php endif; ?>
     </div>
     <div class="toolbar">
       <?php if ($prev): ?><a class="btn btn-ghost btn-sm" href="<?= e(url('aula.php?id=' . $prev['id'])) ?>">&laquo; Anterior</a><?php endif; ?>
-      <?php if ($next): ?><a class="btn btn-ghost btn-sm" href="<?= e(url('aula.php?id=' . $next['id'])) ?>">Próxima &raquo;</a><?php endif; ?>
+      <?php if ($next):
+          $nextOk = !$isOwner ? (bool)$next['is_free'] : (($openMap[$next['id']] ?? false) || $isDone); ?>
+      <a id="btn-next" class="btn btn-ghost btn-sm <?= $nextOk ? '' : 'disabled' ?>" data-href="<?= e(url('aula.php?id=' . $next['id'])) ?>" <?= $nextOk ? 'href="' . e(url('aula.php?id=' . $next['id'])) . '"' : 'aria-disabled="true"' ?>>Próxima &raquo;</a><?php endif; ?>
       <a class="btn btn-ghost btn-sm" href="<?= e(url('curso.php?id=' . $cid)) ?>">Página do curso</a>
       <?php if ($prog['pct'] === 100 && has_access($uid, $cid)): ?><a class="btn btn-blue btn-sm" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Certificado</a><?php endif; ?>
     </div>
@@ -91,7 +105,7 @@ require ROOT . '/app/views/header.php';
     <details class="module" <?= $m['id'] == $lesson['module_id'] ? 'open' : '' ?>>
       <summary><?= e($m['title']) ?></summary>
       <?php foreach ($bySec[$m['id']] ?? [] as $l):
-          $can = has_access($uid, $cid) || $l['is_free']; ?>
+          $can = $isOwner ? ($openMap[$l['id']] ?? false) : (bool)$l['is_free']; ?>
         <a class="lesson-item <?= isset($done[$l['id']]) ? 'done' : '' ?> <?= $l['id'] == $lesson['id'] ? 'current' : '' ?>"
            href="<?= e(url($can ? 'aula.php?id=' . $l['id'] : 'curso.php?id=' . $cid)) ?>">
           <span class="dot"><?= $can ? (isset($done[$l['id']]) ? '&#10003;' : '') : '&#128274;' ?></span><span class="t"><?= e($l['title']) ?></span>

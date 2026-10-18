@@ -38,7 +38,7 @@ session_start();
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; base-uri 'self'; object-src 'none'");
+header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.youtube.com https://player.vimeo.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com; base-uri 'self'; object-src 'none'");
 if ($https) {
     header('Strict-Transport-Security: max-age=31536000');
 }
@@ -47,3 +47,8 @@ require ROOT . '/app/helpers.php';
 require ROOT . '/app/auth.php';
 require ROOT . '/app/courses.php';
 require ROOT . '/app/payments.php';
+require ROOT . '/app/mailer.php';
+require ROOT . '/app/coupons.php';
+require ROOT . '/app/watch.php';
+require ROOT . '/app/migrate.php';
+ensure_schema();

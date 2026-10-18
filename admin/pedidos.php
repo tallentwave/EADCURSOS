@@ -6,6 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($o && ($_POST['action'] ?? '') === 'approve' && $o['status'] !== 'paid') {
         q('UPDATE orders SET status="paid", paid_at=? WHERE id=?', [now(), $o['id']]);
         grant_access((int)$o['user_id'], (int)$o['course_id'], 'purchase', (int)$o['id']);
+        mail_purchase((int)$o['id']);
         flash('ok', 'Pedido aprovado manualmente e acesso liberado.');
     } elseif ($o && ($_POST['action'] ?? '') === 'refund' && $o['status'] === 'paid') {
         q('UPDATE orders SET status="refunded" WHERE id=?', [$o['id']]);
