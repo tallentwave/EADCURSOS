@@ -1,0 +1,6 @@
+config/config.php
+config/installed.lock
+storage/materials/*
+!storage/materials/.htaccess
+uploads/*
+!uploads/.htaccess

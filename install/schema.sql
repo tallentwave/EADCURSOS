@@ -1,0 +1,126 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('admin','student') NOT NULL DEFAULT 'student',
+  status ENUM('active','blocked') NOT NULL DEFAULT 'active',
+  created_at DATETIME NOT NULL,
+  last_login DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS courses (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(190) NOT NULL,
+  slug VARCHAR(190) NOT NULL UNIQUE,
+  category VARCHAR(80) NOT NULL DEFAULT 'Geral',
+  short_desc VARCHAR(255) NOT NULL DEFAULT '',
+  description TEXT NULL,
+  price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  cover VARCHAR(255) NULL,
+  banner VARCHAR(255) NULL,
+  featured TINYINT(1) NOT NULL DEFAULT 0,
+  status ENUM('draft','published') NOT NULL DEFAULT 'draft',
+  created_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS modules (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  course_id INT UNSIGNED NOT NULL,
+  title VARCHAR(190) NOT NULL,
+  position INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS lessons (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  module_id INT UNSIGNED NOT NULL,
+  title VARCHAR(190) NOT NULL,
+  description TEXT NULL,
+  video_url VARCHAR(255) NOT NULL DEFAULT '',
+  duration_min INT NOT NULL DEFAULT 0,
+  position INT NOT NULL DEFAULT 0,
+  is_free TINYINT(1) NOT NULL DEFAULT 0,
+  FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS materials (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  lesson_id INT UNSIGNED NOT NULL,
+  title VARCHAR(190) NOT NULL,
+  stored_name VARCHAR(80) NOT NULL,
+  size INT UNSIGNED NOT NULL DEFAULT 0,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS orders (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  status ENUM('pending','paid','cancelled','refunded') NOT NULL DEFAULT 'pending',
+  mp_preference_id VARCHAR(80) NULL,
+  mp_payment_id VARCHAR(40) NULL,
+  created_at DATETIME NOT NULL,
+  paid_at DATETIME NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS enrollments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  source ENUM('purchase','admin') NOT NULL DEFAULT 'admin',
+  order_id INT UNSIGNED NULL,
+  created_at DATETIME NOT NULL,
+  expires_at DATETIME NULL,
+  UNIQUE KEY uq_user_course (user_id, course_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS progress (
+  user_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NOT NULL,
+  completed TINYINT(1) NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY (user_id, lesson_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS comments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  lesson_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  parent_id INT UNSIGNED NULL,
+  body TEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS certificates (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  code VARCHAR(24) NOT NULL UNIQUE,
+  issued_at DATETIME NOT NULL,
+  UNIQUE KEY uq_cert (user_id, course_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ip VARCHAR(45) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  created_at DATETIME NOT NULL,
+  KEY idx_ip (ip, created_at),
+  KEY idx_email (email, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS password_resets (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used TINYINT(1) NOT NULL DEFAULT 0,
+  KEY idx_token (token_hash),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS settings (
+  k VARCHAR(60) PRIMARY KEY,
+  v TEXT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

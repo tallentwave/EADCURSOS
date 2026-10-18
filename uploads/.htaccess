@@ -1,0 +1,7 @@
+Options -Indexes -ExecCGI
+<FilesMatch "\.(php|phtml|phar|php[0-9]|pl|py|cgi|sh)$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(jpe?g|png|webp)$">
+  Require all granted
+</FilesMatch>
