@@ -1,31 +1,32 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
-$u = require_login();
-$uid = (int)$u['id'];
+// Vitrine pública: qualquer visitante vê os cursos; ao entrar, aparecem progresso e "continue assistindo".
+$u = current_user();
+$uid = $u ? (int)$u['id'] : 0;
 
 $courses = q_all('SELECT * FROM courses WHERE status = "published" ORDER BY featured DESC, id DESC');
 $owned = [];
-foreach ($courses as $c) if (has_access($uid, (int)$c['id'])) $owned[(int)$c['id']] = true;
-
 $progress = [];
-foreach ($owned as $cid => $_) {
-    $p = course_progress($uid, $cid);
-    $progress[$cid] = $p['pct'];
+if ($uid) {
+    foreach ($courses as $c) if (has_access($uid, (int)$c['id'])) $owned[(int)$c['id']] = true;
+    foreach ($owned as $cid => $_) $progress[$cid] = course_progress($uid, $cid)['pct'];
 }
 
 // "Continuar assistindo": cursos com progresso iniciado e não concluído, mais recente primeiro
 $continue = [];
-$last = q_all('SELECT m.course_id, MAX(p.updated_at) AS last FROM progress p
-               JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id
-               WHERE p.user_id = ? GROUP BY m.course_id ORDER BY last DESC', [$uid]);
-$byId = array_column($courses, null, 'id');
-foreach ($last as $r) {
-    $cid = (int)$r['course_id'];
-    if (isset($owned[$cid], $byId[$cid]) && $progress[$cid] < 100) {
-        $c = $byId[$cid];
-        $nl = next_lesson($uid, $cid);
-        if ($nl) $c['next_lesson_id'] = $nl['id'];
-        $continue[] = $c;
+if ($uid) {
+    $last = q_all('SELECT m.course_id, MAX(p.updated_at) AS last FROM progress p
+                   JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id
+                   WHERE p.user_id = ? GROUP BY m.course_id ORDER BY last DESC', [$uid]);
+    $byId = array_column($courses, null, 'id');
+    foreach ($last as $r) {
+        $cid = (int)$r['course_id'];
+        if (isset($owned[$cid], $byId[$cid]) && $progress[$cid] < 100) {
+            $c = $byId[$cid];
+            $nl = next_lesson($uid, $cid);
+            if ($nl) $c['next_lesson_id'] = $nl['id'];
+            $continue[] = $c;
+        }
     }
 }
 
@@ -43,7 +44,7 @@ foreach ($courses as $c) {
 $cats = [];
 foreach ($courses as $c) $cats[$c['category']][] = $c;
 
-$title = 'Início';
+$title = 'Cursos';
 require ROOT . '/app/views/header.php';
 ?>
 <?php if ($hero): $heroOwned = isset($owned[(int)$hero['id']]); ?>
@@ -59,6 +60,7 @@ require ROOT . '/app/views/header.php';
         <a class="btn" href="<?= e(url('curso.php?id=' . $hero['id'])) ?>"><?= (float)$hero['price'] > 0 ? 'Quero este curso · ' . money($hero['price']) : 'Começar grátis' ?></a>
       <?php endif; ?>
       <a class="btn btn-ghost" href="<?= e(url('curso.php?id=' . $hero['id'])) ?>">Mais informações</a>
+      <?php if (!$u): ?><a class="btn btn-ghost" href="<?= e(url('login.php')) ?>">Já sou aluno</a><?php endif; ?>
     </div>
   </div>
 </section>
@@ -81,10 +83,10 @@ require ROOT . '/app/views/header.php';
 <?php endif; ?>
 
 <?php foreach ($cats as $cat => $list):
-    $locked = array_filter($list, fn($c) => !isset($owned[(int)$c['id']]));
-    if (!$locked) continue; ?>
-<section class="row"><h2><?= e($cat) ?> · disponíveis</h2><div class="scroller">
-  <?php foreach ($locked as $c) echo course_card($c, false); ?>
+    $show = array_filter($list, fn($c) => !isset($owned[(int)$c['id']]));
+    if (!$show) continue; ?>
+<section class="row"><h2><?= e($cat) ?><?= $uid ? ' · disponíveis' : '' ?></h2><div class="scroller">
+  <?php foreach ($show as $c) echo course_card($c, false); ?>
 </div></section>
 <?php endforeach; ?>
 <?php require ROOT . '/app/views/footer.php'; ?>

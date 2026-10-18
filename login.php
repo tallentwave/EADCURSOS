@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
-if (current_user()) redirect('home.php');
+remember_next();
+if (current_user()) redirect(safe_next());
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

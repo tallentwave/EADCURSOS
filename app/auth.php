@@ -20,7 +20,7 @@ function require_login(): array
 {
     $u = current_user();
     if (!$u) {
-        $_SESSION['next'] = $_SERVER['REQUEST_URI'] ?? '';
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') $_SESSION['next'] = $_SERVER['REQUEST_URI'] ?? '';
         redirect('login.php');
     }
     return $u;
@@ -70,11 +70,20 @@ function password_ok(string $p): ?string
     return null;
 }
 
+/** Guarda o destino pós-login vindo de ?next= (validado só na hora de usar). */
+function remember_next(): void
+{
+    if (isset($_GET['next']) && is_string($_GET['next']) && strlen($_GET['next']) < 300) $_SESSION['next'] = $_GET['next'];
+}
+
 function safe_next(): string
 {
     $n = $_SESSION['next'] ?? '';
     unset($_SESSION['next']);
-    $base = parse_url(BASE_URL, PHP_URL_PATH) ?: '';
-    if ($n !== '' && $n[0] === '/' && !str_starts_with($n, '//') && str_starts_with($n, $base . '/')) return $n;
+    $base = BASE_URL_PATH;
+    // só aceita caminhos do próprio site (evita redirecionamento aberto); devolve relativo à raiz do site
+    if ($n !== '' && $n[0] === '/' && !str_starts_with($n, '//') && !str_contains($n, '\\') && !str_contains($n, '..') && !preg_match('/[\r\n]/', $n) && str_starts_with($n, $base . '/')) {
+        return ltrim(substr($n, strlen($base)), '/');
+    }
     return is_admin() ? 'admin/' : 'home.php';
 }

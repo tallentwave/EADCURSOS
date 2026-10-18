@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
-if (current_user()) redirect('home.php');
+remember_next();
+if (current_user()) redirect(safe_next());
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -35,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $u = q_one('SELECT * FROM users WHERE id = ?', [$newId]);
         login_user($u);
         mail_welcome($u);
-        redirect('home.php');
+        redirect(safe_next());
     }
 }
 ?>

@@ -14,9 +14,10 @@ if (!has_access($uid, $cid) && !$lesson['is_free']) {
 
 $isOwner = has_access($uid, $cid);
 $openMap = $isOwner ? open_map($uid, $cid) : [];
+$pcts = $isOwner ? lesson_pcts($uid, $cid) : [];
 if ($isOwner && !($openMap[(int)$lesson['id']] ?? false)) {
     if ($blk = first_blocking_exam($uid, $cid)) { flash('err', 'Faça a prova do módulo anterior para liberar esta aula.'); redirect('prova.php?id=' . $blk['id']); }
-    flash('err', 'Assista pelo menos 90% da aula anterior para liberar esta.');
+    flash('err', 'Assista a aula anterior até o final para liberar esta.');
     $nl = next_lesson($uid, $cid);
     redirect($nl && $nl['id'] != $lesson['id'] ? 'aula.php?id=' . $nl['id'] : 'curso.php?id=' . $cid);
 }
@@ -59,7 +60,7 @@ require ROOT . '/app/views/header.php';
   <div>
     <?php if ($embed): ?>
       <div class="video" id="player-wrap"><div class="stage" id="player" data-lesson="<?= (int)$lesson['id'] ?>" data-src="<?= e(url('video.php?id=' . $lesson['id'])) ?>" data-ping="<?= e(url('watch.php')) ?>"><div class="msg">Carregando vídeo...</div></div></div>
-      <div class="watchbar" id="watchbar"><div class="track"><i id="watch-fill" style="width:<?= $isDone ? 100 : 0 ?>%"></i></div><span id="watch-status"><?= $isDone ? '&#10003; Aula concluída' : ($isOwner ? 'Assista pelo menos 90% para liberar a próxima aula' : 'Aula de degustação') ?></span></div>
+      <div class="watchbar" id="watchbar"><div class="track"><i id="watch-fill" style="width:<?= $isDone ? 100 : (int)($pcts[$lesson['id']] ?? 0) ?>%"></i></div><span id="watch-status"><?= $isDone ? '&#10003; Aula concluída' : ($isOwner ? 'Assista a aula inteira para liberar a próxima' : 'Aula de degustação') ?></span></div>
     <?php else: ?>
       <div class="video empty">Vídeo não disponível para esta aula.</div>
     <?php endif; ?>
@@ -114,7 +115,9 @@ require ROOT . '/app/views/header.php';
           $can = $isOwner ? ($openMap[$l['id']] ?? false) : (bool)$l['is_free']; ?>
         <a class="lesson-item <?= isset($done[$l['id']]) ? 'done' : '' ?> <?= $l['id'] == $lesson['id'] ? 'current' : '' ?>"
            href="<?= e(url($can ? 'aula.php?id=' . $l['id'] : 'curso.php?id=' . $cid)) ?>">
-          <span class="dot"><?= $can ? (isset($done[$l['id']]) ? '&#10003;' : '') : '&#128274;' ?></span><span class="t"><?= e($l['title']) ?></span>
+          <span class="dot"><?= $can ? (isset($done[$l['id']]) ? '&#10003;' : '') : '&#128274;' ?></span>
+          <span class="t"><?= e($l['title']) ?><?php if ($isOwner): $lp = isset($done[$l['id']]) ? 100 : (int)($pcts[$l['id']] ?? 0); ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+          <?php if ($isOwner): ?><small class="lpct"><?= $lp ?>%</small><?php endif; ?>
         </a>
       <?php endforeach; ?>
     </details>

@@ -1,20 +1,22 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
-$u = require_login();
-$uid = (int)$u['id'];
+$u = current_user();           // página pública: visitantes podem ver a apresentação do curso
+$uid = $u ? (int)$u['id'] : 0;
 $c = course_by_id((int)($_GET['id'] ?? 0));
-if (!$c || ($c['status'] !== 'published' && $u['role'] !== 'admin')) { http_response_code(404); exit('Curso não encontrado.'); }
+if (!$c || ($c['status'] !== 'published' && (!$u || $u['role'] !== 'admin'))) { http_response_code(404); exit('Curso não encontrado.'); }
 $cid = (int)$c['id'];
 $owned = has_access($uid, $cid);
 
 $mods = q_all('SELECT * FROM modules WHERE course_id = ? ORDER BY position, id', [$cid]);
 $lessonsBy = [];
 foreach (course_lessons($cid) as $l) $lessonsBy[$l['module_id']][] = $l;
-$doneSet = array_flip(array_column(q_all('SELECT lesson_id FROM progress WHERE user_id = ? AND completed = 1', [$uid]), 'lesson_id'));
-$prog = course_progress($uid, $cid);
+$doneSet = $uid ? array_flip(array_column(q_all('SELECT lesson_id FROM progress WHERE user_id = ? AND completed = 1', [$uid]), 'lesson_id')) : [];
+$prog = $uid ? course_progress($uid, $cid) : ['total' => (int)q_val('SELECT COUNT(*) FROM lessons l JOIN modules m ON m.id = l.module_id WHERE m.course_id = ?', [$cid]), 'done' => 0, 'pct' => 0];
+$pcts = $owned ? lesson_pcts($uid, $cid) : [];
+$nextUrl = 'curso.php?id=' . $cid;
 $openMap = $owned ? open_map($uid, $cid) : [];
 $nl = $owned ? next_lesson($uid, $cid) : null;
-$pending = !$owned ? q_one('SELECT id FROM orders WHERE user_id = ? AND course_id = ? AND status = "pending" ORDER BY id DESC LIMIT 1', [$uid, $cid]) : null;
+$pending = !$owned && $uid ? q_one('SELECT id FROM orders WHERE user_id = ? AND course_id = ? AND status = "pending" ORDER BY id DESC LIMIT 1', [$uid, $cid]) : null;
 
 $title = $c['title'];
 require ROOT . '/app/views/header.php';
@@ -32,6 +34,11 @@ require ROOT . '/app/views/header.php';
       <?php elseif ($hasFinal || required_module_exams($cid)): ?><div class="meta">&#127942; Certificado: <?= e($certWhy) ?></div><?php endif; ?>
       <div class="bar" style="max-width:340px;margin-top:16px"><i style="width:<?= $prog['pct'] ?>%"></i></div>
       <div class="meta"><?= $prog['pct'] ?>% concluído</div>
+    <?php elseif (!$u): ?>
+      <span class="big-price"><?= (float)$c['price'] > 0 ? money($c['price']) : 'Grátis' ?></span>
+      <a class="btn" href="<?= e(url('login.php?next=' . urlencode(BASE_URL_PATH . '/' . $nextUrl))) ?>"><?= (float)$c['price'] > 0 ? 'Entrar para comprar' : 'Entrar para começar' ?></a>
+      <a class="btn btn-ghost" href="<?= e(url('registro.php?next=' . urlencode(BASE_URL_PATH . '/' . $nextUrl))) ?>">Criar conta</a>
+      <p class="meta">Aulas marcadas como grátis podem ser assistidas depois de entrar. O restante é liberado após a compra.</p>
     <?php else: ?>
       <form method="post" action="<?= e(url('comprar.php')) ?>">
         <?= csrf_field() ?><input type="hidden" name="course_id" value="<?= $cid ?>">
@@ -58,13 +65,18 @@ require ROOT . '/app/views/header.php';
     <?php foreach ($lessonsBy[$m['id']] ?? [] as $l):
         $can = $owned ? ($openMap[$l['id']] ?? false) : (bool)$l['is_free'];
         $done = isset($doneSet[$l['id']]); ?>
+      <?php $lp = $done ? 100 : (int)($pcts[$l['id']] ?? 0); $dur = lesson_duration($l);
+            $durTxt = $dur >= 60 ? fmt_workload((int)round($dur / 60)) : ($dur > 0 ? (int)$dur . ' s' : ''); ?>
       <?php if ($can): ?>
       <a class="lesson-item <?= $done ? 'done' : '' ?>" href="<?= e(url('aula.php?id=' . $l['id'])) ?>">
-        <span class="dot"><?= $done ? '&#10003;' : '' ?></span><span class="t"><?= e($l['title']) ?></span>
-        <small><?= $l['is_free'] && !$owned ? 'Grátis · ' : '' ?><?= $l['duration_min'] ? (int)$l['duration_min'] . ' min' : '' ?></small>
+        <span class="dot"><?= $done ? '&#10003;' : '' ?></span>
+        <span class="t"><?= e($l['title']) ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+        <small><?= $l['is_free'] && !$owned ? 'Grátis · ' : '' ?><?= e($durTxt) ?><?= $owned ? ' · <b class="lpctb">' . $lp . '%</b>' : '' ?></small>
       </a>
       <?php else: ?>
-      <div class="lesson-item" style="opacity:.6" title="<?= $owned ? 'Assista a aula anterior para liberar' : 'Compre o curso para liberar' ?>"><span class="dot">&#128274;</span><span class="t"><?= e($l['title']) ?></span><small><?= $l['duration_min'] ? (int)$l['duration_min'] . ' min' : '' ?></small></div>
+      <div class="lesson-item locked" title="<?= $owned ? 'Assista a aula anterior até o final para liberar' : 'Adquira o curso para liberar' ?>"><span class="dot">&#128274;</span>
+        <span class="t"><?= e($l['title']) ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+        <small><?= e($durTxt) ?><?= $owned ? ' · <b class="lpctb">' . $lp . '%</b>' : '' ?></small></div>
       <?php endif; ?>
     <?php endforeach; ?>
     <?= exam_row_html(module_exam((int)$m['id']), $owned, $uid) ?>

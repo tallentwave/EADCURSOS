@@ -104,14 +104,25 @@
         }
       }
     } else if (statusEl) {
-      statusEl.textContent = 'Assistido ' + j.pct + '% — necessário 90% para liberar a próxima aula';
+      statusEl.textContent = 'Assistido ' + j.pct + '% — assista até o final para liberar a próxima aula';
+    }
+    // barrinha e % da aula atual na lista lateral
+    var curItem = document.querySelector('.lesson-item.current');
+    if (curItem) {
+      var lb = curItem.querySelector('.lbar i'); if (lb) lb.style.width = j.pct + '%';
+      var lp = curItem.querySelector('.lpct'); if (lp) lp.textContent = j.pct + '%';
     }
   }
 
-  function ping() {
+  /* mode: undefined = batimento; 'resume' = marca o início de um trecho (sem crédito);
+     'pause'/'end' = fecha o trecho que estava tocando (credita o tempo real até agora). */
+  function ping(mode) {
     if (!ad || info.bypass) return;
-    var now = Date.now(); if (now - lastPing < 1500) return; lastPing = now;
-    var b = new URLSearchParams({ lesson_id: lessonId, pos: String(ad.time()), playing: ad.playing() ? '1' : '0', dur: String(ad.duration()), _csrf: csrf });
+    var now = Date.now(); if (!mode && now - lastPing < 1500) return; lastPing = now;
+    var playing = mode === 'resume' ? '0' : (mode ? '1' : (ad.playing() ? '1' : '0'));
+    var pos = ad.time(), d = ad.duration();
+    if (mode === 'end' && d) pos = Math.max(pos, d);
+    var b = new URLSearchParams({ lesson_id: lessonId, pos: String(pos), playing: playing, dur: String(d), _csrf: csrf });
     fetch(stage.getAttribute('data-ping'), { method: 'POST', body: b, credentials: 'same-origin' })
       .then(function (r) { return r.json(); }).then(applyStatus).catch(function () {});
   }
@@ -121,7 +132,11 @@
     stage.querySelectorAll('.msg').forEach(function (m) { m.remove(); });
     buildUI();
     maxLocal = info.start || 0; lastCur = maxLocal;
-    ad.onstate = function (playing, ended) { paintState(playing); if (!playing) ping(); if (ended && info.bypass && statusEl) statusEl.innerHTML = '&#10003; Fim da aula'; };
+    ad.onstate = function (playing, ended) {
+      paintState(playing);
+      ping(playing ? 'resume' : (ended ? 'end' : 'pause'));
+      if (ended && info.bypass && statusEl) statusEl.innerHTML = '&#10003; Fim da aula';
+    };
     if (info.done) applyStatus({ ok: true, done: true, pct: 100 });
     if (info.bypass) {
       var note = document.getElementById('watch-status');

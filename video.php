@@ -17,5 +17,5 @@ echo json_encode($src + [
     'start' => $row ? floor((float)$row['progress_sec']) : 0,
     'done' => $done,
     'dur' => $dur,
-    'pct' => $dur > 0 ? (int)min(100, floor(($row ? (float)$row['progress_sec'] : 0) * 100 / ($dur * WATCH_MIN_RATIO))) : 0,
+    'pct' => watch_pct($row ? (float)$row['progress_sec'] : 0.0, $dur, $done),
 ]);

@@ -195,3 +195,12 @@ th{background:var(--navy);color:var(--gold);font-weight:600;font-size:.82rem;tex
 
 .no-print{display:flex;gap:12px;flex-wrap:wrap}
 @media print{.no-print{display:none!important}}
+
+/* barrinha de % assistido por aula */
+.lbar{display:block;height:4px;background:#1d2a50;border-radius:3px;overflow:hidden;margin-top:6px}
+.lbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s}
+.lpct{color:var(--gold2)!important;font-weight:600;min-width:34px;text-align:right}
+.lpctb{color:var(--gold2)}
+.lesson-item.locked{opacity:.6;cursor:not-allowed}
+.lesson-item.locked .dot{border-color:var(--gold);color:var(--gold)}
+.lesson-item .t{min-width:0}

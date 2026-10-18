@@ -1,8 +1,32 @@
 <?php
 declare(strict_types=1);
 
-/** Fração mínima do vídeo que o aluno precisa assistir para liberar a próxima aula. */
-const WATCH_MIN_RATIO = 0.9;
+/** O aluno precisa assistir a aula inteira; só perdoamos estes segundos finais por falhas de conexão/buffer. */
+const WATCH_TOLERANCE_SEC = 3;
+
+/** Tempo mínimo (em segundos de vídeo) para concluir a aula. 0 = duração desconhecida. */
+function watch_need(float $dur): float { return $dur > 0 ? max($dur * 0.5, $dur - WATCH_TOLERANCE_SEC) : 0.0; }
+
+/** Percentual assistido (0-99 enquanto não concluiu; 100 quando concluída). */
+function watch_pct(float $progress, float $dur, bool $done): int
+{
+    if ($done) return 100;
+    return $dur > 0 ? (int)min(99, floor($progress * 100 / $dur)) : 0;
+}
+
+/** lesson_id => % assistido, para as barrinhas de progresso. */
+function lesson_pcts(int $uid, int $courseId): array
+{
+    $out = [];
+    foreach (q_all('SELECT l.id, l.duration_min, l.duration_sec, COALESCE(w.progress_sec, 0) AS ps, COALESCE(p.completed, 0) AS done
+                    FROM lessons l JOIN modules m ON m.id = l.module_id
+                    LEFT JOIN lesson_watch w ON w.lesson_id = l.id AND w.user_id = ?
+                    LEFT JOIN progress p ON p.lesson_id = l.id AND p.user_id = ?
+                    WHERE m.course_id = ?', [$uid, $uid, $courseId]) as $r) {
+        $out[(int)$r['id']] = watch_pct((float)$r['ps'], lesson_duration($r), (bool)$r['done']);
+    }
+    return $out;
+}
 
 function lesson_has_video(array $l): bool { return video_embed((string)($l['video_url'] ?? '')) !== null; }
 
@@ -53,7 +77,7 @@ function watch_ping(int $uid, array $lesson, float $pos, bool $playing, float $c
 {
     $dur = lesson_duration($lesson);
     if ($dur <= 0 && $clientDur >= 5 && $clientDur <= 86400) $dur = round($clientDur); // duração não cadastrada: usa a do player
-    $need = $dur * WATCH_MIN_RATIO;
+    $need = watch_need($dur);
     $now = microtime(true);
     $lid = (int)$lesson['id'];
 
@@ -80,7 +104,7 @@ function watch_ping(int $uid, array $lesson, float $pos, bool $playing, float $c
         $pdo->rollBack();
         throw $e;
     }
-    return ['progress' => $progress, 'dur' => $dur, 'need' => $need, 'pct' => $need > 0 ? (int)min(100, floor($progress * 100 / $need)) : 0, 'done' => $done];
+    return ['progress' => $progress, 'dur' => $dur, 'need' => $need, 'pct' => watch_pct($progress, $dur, $done), 'done' => $done];
 }
 
 /** Carrega a aula e valida acesso + sequência. Retorna [lesson, bypass] ou encerra com JSON de erro. */

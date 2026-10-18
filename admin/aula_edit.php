@@ -43,7 +43,7 @@ require ROOT . '/app/views/admin_header.php';
 <label>Link do vídeo (YouTube ou Vimeo)</label><input type="url" name="video_url" value="<?= e($l['video_url']) ?>">
 <label>Descrição</label><textarea name="description"><?= e($l['description']) ?></textarea>
 <div class="grid2"><div><label>Duração aproximada (min)</label><input type="number" name="duration_min" min="0" value="<?= (int)$l['duration_min'] ?>"></div>
-<div><label>Duração exata (segundos) — define o mínimo de 90%</label><input type="number" name="duration_sec" min="0" value="<?= (int)$l['duration_sec'] ?>"><div class="hint">Dica: abra a aula como administrador e dê play por alguns segundos — a duração exata é gravada automaticamente.</div></div></div>
+<div><label>Duração exata (segundos) — usada para conferir que o aluno assistiu até o fim</label><input type="number" name="duration_sec" min="0" value="<?= (int)$l['duration_sec'] ?>"><div class="hint">Dica: abra a aula como administrador e dê play por alguns segundos — a duração exata é gravada automaticamente.</div></div></div>
 <label class="check"><input type="checkbox" name="is_free" <?= $l['is_free'] ? 'checked' : '' ?>> Aula gratuita (visível sem comprar o curso)</label><br><button class="btn">Salvar</button></form>
 
 <div class="formbox"><h2 style="margin:14px 0 6px">Materiais (PDF)</h2>

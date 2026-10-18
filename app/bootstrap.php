@@ -14,6 +14,7 @@ if (!is_file(CONFIG_FILE)) {
 $CONFIG = require CONFIG_FILE;
 define('BASE_URL', rtrim($CONFIG['base_url'], '/'));
 define('APP_KEY', $CONFIG['app_key']);
+define('BASE_URL_PATH', rtrim((string)(parse_url(BASE_URL, PHP_URL_PATH) ?: ''), '/'));
 
 error_reporting(E_ALL);
 ini_set('display_errors', !empty($CONFIG['debug']) ? '1' : '0');

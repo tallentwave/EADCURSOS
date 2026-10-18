@@ -12,7 +12,7 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 
 ## Novidades da versão 2
 - **Player protegido** (YouTube/Vimeo): sem controles nativos, sem teclado, sem menu de contexto, sem velocidade, sem avançar. O link do vídeo **não aparece no HTML**: ele só é entregue por `video.php` a quem tem acesso e a aula liberada.
-- **Mínimo de 90% assistido** para liberar a próxima aula. A contagem é feita **no servidor** com tempo real (pular, acelerar ou enviar pings em rajada não gera crédito além de ~1,05x do relógio). Pausar ou deixar a aba em segundo plano não conta. O botão "marcar como concluída" não existe para aulas em vídeo.
+- **A aula precisa ser assistida inteira** para liberar a próxima (tolerância de 3 s no final só para falhas de conexão). A contagem é feita **no servidor** com tempo real (pular, acelerar ou enviar pings em rajada não gera crédito além de ~1,05x do relógio). Pausar ou deixar a aba em segundo plano não conta. O botão "marcar como concluída" não existe para aulas em vídeo.
 - **Duração**: cadastre os segundos exatos da aula (ou abra a aula como admin e dê play: a duração é gravada sozinha). Sem duração cadastrada o sistema usa a informada pelo player do aluno, que é menos confiável.
 - **E-mail por SMTP** (Admin → Configurações): boas-vindas, recuperação de senha e confirmação de compra, com botão de teste. A senha SMTP e os tokens do Mercado Pago ficam **criptografados** (AES-256-GCM).
 - **Cupons** (% ou valor fixo, por curso ou geral, limite de usos, validade, uso único por aluno). Cupom de 100% libera o curso sem passar pelo Mercado Pago.
@@ -44,6 +44,13 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Prévia** do certificado com dados de exemplo (`Admin → Configurações → Pré-visualizar`), nos dois temas.
 - **Correção do botão Imprimir/Salvar PDF**: o botão usava `onclick` embutido, que a política de segurança do site (CSP) bloqueia. Agora usa tratadores no JavaScript externo. O mesmo bloqueio afetava a confirmação de *excluir módulo* e *remover comentário* e a troca de privacidade do certificado — todos corrigidos.
 - A impressão sai em **uma página A4 paisagem**, sem margens, com fontes embutidas e texto selecionável. Na janela de impressão escolha *Salvar como PDF*.
+
+## Novidades da versão 6 — Vitrine pública e aula assistida por inteiro
+- **Home pública**: qualquer visitante vê a vitrine de cursos (estilo Netflix) e a **página de apresentação de cada curso** (descrição, módulos, aulas, provas, preço) sem precisar de login. Cursos em rascunho continuam ocultos.
+- **Cadeado** nas aulas e provas bloqueadas (para visitantes: tudo que não é aula grátis; para alunos: o que depende de concluir a aula/prova anterior).
+- **Barrinha de % assistido** em cada aula (página do curso e menu lateral da aula), atualizada em tempo real enquanto o aluno assiste.
+- **Regra de 90% removida**: a próxima aula só libera quando a aula atual é assistida **até o final** (tolerância de 3 s). Pausas longas, buffering e o fim do vídeo são contabilizados corretamente no servidor.
+- Para comprar ou assistir, o visitante clica em *Entrar para comprar* e **volta ao curso** depois do login/cadastro (destino validado contra redirecionamento malicioso; funciona em instalações em subpasta).
 
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar o mínimo de 90%. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.

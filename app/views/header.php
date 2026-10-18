@@ -10,7 +10,7 @@
 </head>
 <body class="<?= e($bodyClass ?? '') ?>">
 <header class="nav">
-  <a class="brand" href="<?= e(url($u ? 'home.php' : 'login.php')) ?>"><span>&#9670;</span> <?= e(site_name()) ?></a>
+  <a class="brand" href="<?= e(url('home.php')) ?>"><span>&#9670;</span> <?= e(site_name()) ?></a>
   <?php if ($u): ?>
   <nav>
     <a href="<?= e(url('home.php')) ?>">Início</a>
@@ -20,6 +20,9 @@
     <?php if ($u['role'] === 'admin'): ?><a class="gold" href="<?= e(url('admin/')) ?>">Admin</a><?php endif; ?>
   </nav>
   <form class="logout" method="post" action="<?= e(url('logout.php')) ?>"><?= csrf_field() ?><button class="btn btn-ghost btn-sm">Sair</button></form>
+  <?php else: ?>
+  <nav><a href="<?= e(url('home.php')) ?>">Cursos</a><a href="<?= e(url('verificar.php')) ?>">Validar certificado</a></nav>
+  <div class="logout"><a class="btn btn-ghost btn-sm" href="<?= e(url('login.php')) ?>">Entrar</a> <a class="btn btn-sm" href="<?= e(url('registro.php')) ?>">Criar conta</a></div>
   <?php endif; ?>
 </header>
 <main>
