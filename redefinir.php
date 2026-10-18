@@ -22,7 +22,7 @@ if ($row && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nova senha · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="auth-wrap"><form class="auth-box" method="post">
-<h1>Nova senha</h1>
+<?= auth_logo_html() ?><h1>Nova senha</h1>
 <?php if (!$row): ?><div class="alert alert-err">Link inválido ou expirado.</div>
 <?php else: ?>
 <?php if ($error): ?><div class="alert alert-err"><?= e($error) ?></div><?php endif; ?>

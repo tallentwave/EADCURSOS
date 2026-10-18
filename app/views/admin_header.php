@@ -7,7 +7,7 @@
 <meta name="csrf" content="<?= e(csrf_token()) ?>">
 <title>Admin · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="admin">
-<aside><a class="brand" href="<?= e(url('admin/')) ?>">&#9670; <?= e(site_name()) ?></a>
+<aside><a class="brand" href="<?= e(url('admin/')) ?>"><?= brand_html() ?></a>
 <?php foreach ($menu as $k => [$label, $file]): ?><a class="m <?= ($cur === $k || ($k === 'cursos' && in_array($cur, ['curso_edit', 'conteudo', 'aula_edit', 'prova'], true))) ? 'on' : '' ?>" href="<?= e(url('admin/' . $file)) ?>"><?= e($label) ?></a><?php endforeach; ?>
 <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
 <a class="m" href="<?= e(url('home.php')) ?>">Ver plataforma</a>

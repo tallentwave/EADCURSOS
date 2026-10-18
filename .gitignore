@@ -4,3 +4,4 @@ storage/materials/*
 !storage/materials/.htaccess
 uploads/*
 !uploads/.htaccess
+storage/photos/*

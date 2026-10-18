@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 /** Atualiza bancos de instalações anteriores. Idempotente; roda uma vez por versão. */
 function ensure_schema(): void
@@ -16,6 +16,8 @@ function ensure_schema(): void
         "ALTER TABLE users ADD COLUMN cpf_hash CHAR(64) NULL",
         "ALTER TABLE users ADD COLUMN lgpd_consent_at DATETIME NULL",
         "ALTER TABLE users ADD KEY idx_cpf_hash (cpf_hash)",
+        "ALTER TABLE users ADD COLUMN photo VARCHAR(80) NULL",
+        "ALTER TABLE users ADD COLUMN photo_consent_at DATETIME NULL",
         "ALTER TABLE certificates ADD COLUMN status ENUM('valid','revoked') NOT NULL DEFAULT 'valid'",
         "ALTER TABLE certificates ADD COLUMN revoked_at DATETIME NULL",
         "ALTER TABLE certificates ADD COLUMN show_details TINYINT(1) NOT NULL DEFAULT 1",

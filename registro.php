@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cadastro · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="auth-wrap"><form class="auth-box" method="post">
-<h1>Criar conta</h1><p class="sub">Cadastre-se para adquirir cursos</p>
+<?= auth_logo_html() ?><h1>Criar conta</h1><p class="sub">Cadastre-se para adquirir cursos</p>
 <?php if ($error): ?><div class="alert alert-err"><?= e($error) ?></div><?php endif; ?>
 <?= csrf_field() ?>
 <label>Nome completo</label><input type="text" name="name" required maxlength="120" value="<?= e($_POST['name'] ?? '') ?>">

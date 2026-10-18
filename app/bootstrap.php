@@ -54,5 +54,6 @@ require ROOT . '/app/watch.php';
 require ROOT . '/app/exams.php';
 require ROOT . '/app/privacy.php';
 require ROOT . '/app/certificate.php';
+require ROOT . '/app/card.php';
 require ROOT . '/app/migrate.php';
 ensure_schema();

@@ -70,7 +70,8 @@ $st = ['pending' => ['Pendente', 'warn'], 'paid' => ['Pago', 'ok'], 'cancelled' 
   <div class="formbox"><p style="margin-top:14px">&#127942; <strong><?= e($ce['course_title']) ?></strong> <small style="color:var(--muted)">· emitido em <?= e(date('d/m/Y', strtotime($ce['issued_at']))) ?> · código <?= e(cert_code_display($ce['code'])) ?></small>
     <?= $ce['status'] === 'revoked' ? ' <span class="tag-s tag-bad">Revogado</span>' : '' ?></p>
     <div class="toolbar" style="margin-top:8px">
-      <?php if ($ce['status'] !== 'revoked'): ?><a class="btn btn-sm" href="<?= e(url('certificado.php?curso=' . $ce['course_id'])) ?>">Ver / imprimir</a><?php endif; ?>
+      <?php if ($ce['status'] !== 'revoked'): ?><a class="btn btn-sm" href="<?= e(url('certificado.php?curso=' . $ce['course_id'])) ?>">Ver / imprimir</a>
+      <a class="btn btn-blue btn-sm" href="<?= e(url('carteirinha.php?curso=' . $ce['course_id'])) ?>">&#129706; Carteirinha</a><?php endif; ?>
       <a class="btn btn-ghost btn-sm" target="_blank" href="<?= e(cert_public_url($ce['code'])) ?>">Ver página pública</a></div>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="cert_visibility"><input type="hidden" name="id" value="<?= (int)$ce['id'] ?>">
       <label class="check"><input type="checkbox" name="show" value="1" <?= $ce['show_details'] ? 'checked' : '' ?> data-autosubmit> Exibir meu nome completo, CPF parcial e aproveitamento na página pública de validação</label>

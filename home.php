@@ -50,6 +50,7 @@ require ROOT . '/app/views/header.php';
 <?php if ($hero): $heroOwned = isset($owned[(int)$hero['id']]); ?>
 <section class="hero" style="background-image:url('<?= e(img_url($hero['banner'] ?: $hero['cover'])) ?>')">
   <div class="hero-in">
+    <?php if (site_logo_url()): ?><img class="hero-logo" src="<?= e(site_logo_url()) ?>" alt="<?= e(site_name()) ?>"><?php endif; ?>
     <span class="tag">Em destaque</span>
     <h1><?= e($hero['title']) ?></h1>
     <p><?= e($hero['short_desc']) ?></p>

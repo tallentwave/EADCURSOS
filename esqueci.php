@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Recuperar senha · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="auth-wrap"><form class="auth-box" method="post">
-<h1>Recuperar senha</h1>
+<?= auth_logo_html() ?><h1>Recuperar senha</h1>
 <?php if ($sent): ?><div class="alert alert-ok">Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha.</div>
 <?php else: ?><p class="sub">Informe seu e-mail para receber o link.</p><?= csrf_field() ?>
 <label>E-mail</label><input type="email" name="email" required><br><button class="btn btn-block">Enviar link</button><?php endif; ?>

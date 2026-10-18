@@ -31,6 +31,7 @@ require ROOT . '/app/views/header.php';
       <a class="btn" href="<?= e(url($nl ? 'aula.php?id=' . $nl['id'] : 'home.php')) ?>">&#9654; <?= $prog['done'] ? 'Continuar curso' : 'Começar curso' ?></a>
       <?php [$certOk, $certWhy] = certificate_eligible($uid, $cid); $hasFinal = exam_ready(final_exam($cid)); ?>
       <?php if ($certOk): ?><a class="btn btn-blue" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Emitir certificado</a>
+      <a class="btn btn-blue" href="<?= e(url('carteirinha.php?curso=' . $cid)) ?>">&#129706; Carteirinha</a>
       <?php elseif ($hasFinal || required_module_exams($cid)): ?><div class="meta">&#127942; Certificado: <?= e($certWhy) ?></div><?php endif; ?>
       <div class="bar" style="max-width:340px;margin-top:16px"><i style="width:<?= $prog['pct'] ?>%"></i></div>
       <div class="meta"><?= $prog['pct'] ?>% concluído</div>

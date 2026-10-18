@@ -31,7 +31,7 @@ $title = 'Entrar';
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entrar · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="auth-wrap"><form class="auth-box" method="post" autocomplete="on">
-<h1>&#9670; <?= e(site_name()) ?></h1><p class="sub">Acesse sua área de membros</p>
+<h1><?= brand_html("auth-logo") ?></h1><p class="sub">Acesse sua área de membros</p>
 <?= flashes() ?>
 <?php if ($error): ?><div class="alert alert-err"><?= e($error) ?></div><?php endif; ?>
 <?= csrf_field() ?>

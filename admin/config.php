@@ -18,9 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     set_setting('cert_theme', ($_POST['cert_theme'] ?? '') === 'light' ? 'light' : 'dark');
     try {
         if ($sig = save_signature($_FILES['cert_signature'] ?? [])) { @unlink(ROOT . '/uploads/' . basename(setting('cert_signature'))); set_setting('cert_signature', $sig); }
-        if ($logo = save_image($_FILES['cert_logo'] ?? [], 'logo')) { if (setting('cert_logo')) @unlink(ROOT . '/uploads/' . basename(setting('cert_logo'))); set_setting('cert_logo', $logo); }
+        if ($logo = save_logo_image($_FILES['cert_logo'] ?? [], 'logo')) { if (setting('cert_logo')) @unlink(ROOT . '/uploads/' . basename(setting('cert_logo'))); set_setting('cert_logo', $logo); }
+        if ($sl = save_logo_image($_FILES['site_logo'] ?? [], 'sitelogo')) { if (setting('site_logo')) @unlink(ROOT . '/uploads/' . basename(setting('site_logo'))); set_setting('site_logo', $sl); }
     } catch (RuntimeException $ex) { flash('err', $ex->getMessage()); }
-    foreach (['cert_signature', 'cert_logo'] as $k) if (isset($_POST['remove_' . $k]) && setting($k) !== '') { @unlink(ROOT . '/uploads/' . basename(setting($k))); set_setting($k, ''); }
+    set_setting('site_logo_only', isset($_POST['site_logo_only']) ? '1' : '0');
+    foreach (['cert_signature', 'cert_logo', 'site_logo'] as $k) if (isset($_POST['remove_' . $k]) && setting($k) !== '') { @unlink(ROOT . '/uploads/' . basename(setting($k))); set_setting($k, ''); }
 
     // SMTP
     set_setting('mail_from', filter_var($_POST['mail_from'] ?? '', FILTER_VALIDATE_EMAIL) ?: '');
@@ -45,6 +47,12 @@ $enc = setting('smtp_enc', 'tls');
 <h1>Configurações</h1>
 <form class="formbox" method="post" enctype="multipart/form-data"><?= csrf_field() ?>
 <label>Nome da plataforma</label><input type="text" name="site_name" value="<?= e(site_name()) ?>">
+<label>Logo da plataforma (aparece no topo de todas as páginas, na página inicial e nas telas de login)</label>
+<input type="file" name="site_logo" accept="image/png,image/jpeg,image/webp">
+<div class="hint">PNG com fundo transparente fica melhor sobre o fundo escuro. Será reduzido automaticamente. Altura exibida no topo: ~38px.</div>
+<?php if (setting('site_logo')): ?><div class="hint"><img src="<?= e(url('uploads/' . setting('site_logo'))) ?>" style="height:38px;background:#07080c;padding:6px;border-radius:6px;display:inline-block;vertical-align:middle;border:1px solid var(--line)">
+<label class="check" style="display:inline-flex;margin-left:10px"><input type="checkbox" name="remove_site_logo"> remover</label></div><?php endif; ?>
+<label class="check"><input type="checkbox" name="site_logo_only" <?= setting('site_logo_only') === '1' ? 'checked' : '' ?>> Mostrar apenas o logo (ocultar o nome ao lado)</label>
 
 <h2 style="margin:26px 0 0;color:var(--gold)">Instituição, certificado e LGPD</h2>
 <div class="hint">Aparecem no certificado, na página pública de validação e na Política de Privacidade.</div>

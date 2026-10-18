@@ -104,6 +104,8 @@ function export_user_data(int $uid): array
         'gerado_em' => now(),
         'conta' => ['nome' => $u['name'] ?? '', 'email' => $u['email'] ?? '', 'cpf' => user_cpf($u), 'perfil' => $u['role'] ?? '',
                     'cadastro' => $u['created_at'] ?? '', 'ultimo_login' => $u['last_login'] ?? '', 'consentimento_lgpd_em' => $u['lgpd_consent_at'] ?? ''],
+        'foto_carteirinha' => (($pb = user_photo_bytes($u['photo'] ?? null)) !== null ? 'data:image/jpeg;base64,' . base64_encode($pb) : null),
+        'foto_consentimento_em' => $u['photo_consent_at'] ?? null,
         'matriculas' => q_all('SELECT c.title AS curso, e.source AS origem, e.created_at, e.expires_at FROM enrollments e JOIN courses c ON c.id = e.course_id WHERE e.user_id = ?', [$uid]),
         'pedidos' => q_all('SELECT o.id, c.title AS curso, o.amount AS valor, o.discount AS desconto, o.status, o.created_at, o.paid_at FROM orders o JOIN courses c ON c.id = o.course_id WHERE o.user_id = ?', [$uid]),
         'progresso' => q_all('SELECT l.title AS aula, p.completed AS concluida, p.updated_at FROM progress p JOIN lessons l ON l.id = p.lesson_id WHERE p.user_id = ?', [$uid]),
@@ -120,10 +122,11 @@ function erase_user(int $uid): void
     $pdo->beginTransaction();
     try {
         $email = q_val('SELECT email FROM users WHERE id = ?', [$uid]);
+        if (($pp = user_photo_path(q_val('SELECT photo FROM users WHERE id = ?', [$uid])))) @unlink($pp);
         foreach (['certificates', 'comments', 'progress', 'lesson_watch', 'exam_attempts', 'enrollments', 'password_resets'] as $t) q("DELETE FROM $t WHERE user_id = ?", [$uid]);
         if ($email) q('DELETE FROM login_attempts WHERE email = ?', [$email]);
         q('UPDATE vouchers SET redeemed_by = NULL WHERE redeemed_by = ?', [$uid]);
-        q('UPDATE users SET name = "Usuário removido", email = ?, password_hash = ?, status = "blocked", cpf_enc = NULL, cpf_hash = NULL, lgpd_consent_at = NULL WHERE id = ?',
+        q('UPDATE users SET name = "Usuário removido", email = ?, password_hash = ?, status = "blocked", cpf_enc = NULL, cpf_hash = NULL, lgpd_consent_at = NULL, photo = NULL, photo_consent_at = NULL WHERE id = ?',
             ['removido-' . $uid . '@invalid.local', password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), $uid]);
         $pdo->commit();
     } catch (Throwable $e) { $pdo->rollBack(); throw $e; }

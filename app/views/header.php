@@ -10,7 +10,7 @@
 </head>
 <body class="<?= e($bodyClass ?? '') ?>">
 <header class="nav">
-  <a class="brand" href="<?= e(url('home.php')) ?>"><span>&#9670;</span> <?= e(site_name()) ?></a>
+  <a class="brand" href="<?= e(url('home.php')) ?>"><?= brand_html() ?></a>
   <?php if ($u): ?>
   <nav>
     <a href="<?= e(url('home.php')) ?>">Início</a>

@@ -28,6 +28,7 @@ $checks = [
     'Extensão fileinfo' => extension_loaded('fileinfo'),
     'Pasta config/ gravável' => is_writable($root . '/config'),
     'Pasta uploads/ gravável' => is_writable($root . '/uploads'),
+    'Pasta storage/ gravável (fotos e materiais)' => is_writable($root . '/storage'),
     'Pasta storage/materials/ gravável' => is_writable($root . '/storage/materials'),
 ];
 $ok = !in_array(false, $checks, true);
@@ -72,7 +73,7 @@ if ($ok && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $now = date('Y-m-d H:i:s');
         $pdo->prepare('INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?,?,?,"admin",?)')
             ->execute([$aname, $aemail, password_hash($apass, PASSWORD_DEFAULT), $now]);
-        $pdo->prepare('INSERT INTO settings (k, v) VALUES (\'site_name\', ?), (\'mp_sandbox\', \'0\'), (\'schema_version\', \'4\')')->execute([trim($_POST['site_name']) ?: 'EAD Premium']);
+        $pdo->prepare('INSERT INTO settings (k, v) VALUES (\'site_name\', ?), (\'mp_sandbox\', \'0\'), (\'schema_version\', \'5\')')->execute([trim($_POST['site_name']) ?: 'EAD Premium']);
 
         if (!empty($_POST['demo'])) {
             $pdo->prepare('INSERT INTO courses (title, slug, category, short_desc, description, price, featured, status, created_at) VALUES (?,?,?,?,?,?,?,?,?)')

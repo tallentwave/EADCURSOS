@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   cpf_enc VARCHAR(255) NULL,
   cpf_hash CHAR(64) NULL,
   lgpd_consent_at DATETIME NULL,
+  photo VARCHAR(80) NULL,
+  photo_consent_at DATETIME NULL,
   KEY idx_cpf_hash (cpf_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS courses (

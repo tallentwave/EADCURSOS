@@ -52,6 +52,14 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Regra de 90% removida**: a próxima aula só libera quando a aula atual é assistida **até o final** (tolerância de 3 s). Pausas longas, buffering e o fim do vídeo são contabilizados corretamente no servidor.
 - Para comprar ou assistir, o visitante clica em *Entrar para comprar* e **volta ao curso** depois do login/cadastro (destino validado contra redirecionamento malicioso; funciona em instalações em subpasta).
 
+## Novidades da versão 7 — Logo e carteirinha de capacitação
+- **Logo da plataforma** (Admin → Configurações): aparece no topo de todas as páginas (inclusive a home pública), em destaque na vitrine, nas telas de entrada e no admin. É reduzido automaticamente, aceita PNG com transparência e há opção de mostrar só o logo. O logo do certificado também é reduzido/otimizado.
+- **Carteirinha de capacitação** (tamanho de cartão de crédito, 85,6 × 54 mm, 300 dpi), disponível a quem emitiu o certificado. **Frente**: foto 3x4, nome, CPF parcial, "Capacitado(a) em: curso", carga horária, conclusão e emissão. **Verso**: QR Code que leva à página oficial de validação, código, assinatura da responsável e instituição. Tema escuro ou claro, conforme o certificado.
+- **Downloads**: PDF A4 com frente e verso em tamanho real e marcas de corte (gerado no servidor, sem depender da janela de impressão) e PNG de cada lado para guardar no celular/carteira digital.
+- **Foto 3x4**: enviada pelo aluno com **autorização de uso** registrada; recortada em 3x4, com correção de rotação de celular e remoção de metadados. Fica **privada e criptografada em disco** (AES-256-GCM), só é entregue ao próprio dono e **nunca** aparece na página pública de validação.
+- A carteirinha deixa de existir se o certificado for **revogado**; respeita o **modo reservado** (sem CPF) e a foto entra na exportação e na exclusão de dados (LGPD).
+- Em hospedagens Nginx, bloqueie também `/storage` (a criptografia protege as fotos mesmo se isso for esquecido).
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar a regra de assistir a aula inteira. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 

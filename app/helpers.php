@@ -151,3 +151,39 @@ function secret_decrypt(string $stored): string
 }
 function setting_secret(string $k): string { return secret_decrypt(setting($k)); }
 function set_secret(string $k, string $v): void { set_setting($k, secret_encrypt($v)); }
+
+
+// ---------- Marca (logo do site) ----------
+function site_logo_url(): string
+{
+    $f = basename(setting('site_logo'));
+    return $f !== '' && is_file(ROOT . '/uploads/' . $f) ? url('uploads/' . $f) : '';
+}
+/** HTML da marca: logo (se houver) + nome. $class = classe do <img>. */
+function brand_html(string $class = 'brand-logo'): string
+{
+    $logo = site_logo_url();
+    $name = e(site_name());
+    if ($logo === '') return '<span>&#9670;</span> ' . $name;
+    return '<img class="' . e($class) . '" src="' . e($logo) . '" alt="' . $name . '">' . (setting('site_logo_only') === '1' ? '' : ' <span class="brand-name">' . $name . '</span>');
+}
+/** Logo no topo das telas de entrada (cadastro, recuperação de senha) — só aparece se houver logo. */
+function auth_logo_html(): string
+{
+    $l = site_logo_url();
+    return $l !== '' ? '<img class="auth-logo-top" src="' . e($l) . '" alt="' . e(site_name()) . '">' : '';
+}
+
+// ---------- Arquivos privados criptografados em repouso (AES-256-GCM) ----------
+function blob_encrypt(string $plain): string
+{
+    $iv = random_bytes(12);
+    $ct = openssl_encrypt($plain, 'aes-256-gcm', hash('sha256', 'file:' . APP_KEY, true), OPENSSL_RAW_DATA, $iv, $tag);
+    return $iv . $tag . $ct;
+}
+function blob_decrypt(string $blob): ?string
+{
+    if (strlen($blob) < 29) return null;
+    $pt = openssl_decrypt(substr($blob, 28), 'aes-256-gcm', hash('sha256', 'file:' . APP_KEY, true), OPENSSL_RAW_DATA, substr($blob, 0, 12), substr($blob, 12, 16));
+    return $pt === false ? null : $pt;
+}

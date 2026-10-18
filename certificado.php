@@ -28,5 +28,5 @@ cert_render([
     'signature_url' => cert_signature_url(setting('cert_theme', 'dark')),
     'logo_url' => setting('cert_logo') ? url('uploads/' . setting('cert_logo')) : '',
     'theme' => setting('cert_theme', 'dark'),
-    'extra_actions' => '<a class="btn btn-ghost" href="' . e(url('curso.php?id=' . $c['id'])) . '">Voltar ao curso</a><a class="btn btn-ghost" href="' . e(url('perfil.php#certificados')) . '">Privacidade do certificado</a>',
+    'extra_actions' => '<a class="btn btn-ghost" href="' . e(url('curso.php?id=' . $c['id'])) . '">Voltar ao curso</a><a class="btn btn-blue" href="' . e(url('carteirinha.php?curso=' . $c['id'])) . '">&#129706; Carteirinha</a><a class="btn btn-ghost" href="' . e(url('perfil.php#certificados')) . '">Privacidade do certificado</a>',
 ]);

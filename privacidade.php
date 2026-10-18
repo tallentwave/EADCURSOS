@@ -20,6 +20,7 @@ $cnpj = setting('company_cnpj');
 <ul style="margin-left:22px">
 <li><strong>Nome e e-mail</strong>: criar sua conta, acesso à plataforma e comunicações do curso (execução de contrato).</li>
 <li><strong>CPF (opcional até a emissão do certificado)</strong>: identificar o titular do certificado e evitar fraudes. É armazenado <strong>criptografado</strong> e exibido somente de forma parcial (ex.: ***.123.456-**).</li>
+<li><strong>Foto (opcional)</strong>: usada somente na sua carteirinha de capacitação, mediante a sua autorização. Fica armazenada de forma privada, <strong>nunca</strong> aparece na página pública de validação e pode ser trocada ou removida por você a qualquer momento.</li>
 <li><strong>Progresso, notas de provas e comentários</strong>: operar os cursos, avaliações e certificação.</li>
 <li><strong>Pedidos e pagamentos</strong>: liberar o acesso e cumprir obrigações fiscais. Dados de cartão são tratados pelo Mercado Pago; não os recebemos nem guardamos.</li>
 <li><strong>Dados técnicos</strong> (endereço IP, tentativas de login): segurança e prevenção a fraudes, por prazo curto.</li>

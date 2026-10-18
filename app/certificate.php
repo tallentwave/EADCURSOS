@@ -56,13 +56,19 @@ function save_signature(array $f): ?string
 /** URL da assinatura já pintada na cor do tema (gerada uma vez e guardada em uploads/). */
 function cert_signature_url(string $theme): string
 {
+    $f = cert_signature_file($theme);
+    return $f ? url('uploads/' . basename($f)) : '';
+}
+/** Caminho do arquivo da assinatura já pintada na cor do tema (ou null). */
+function cert_signature_file(string $theme): ?string
+{
     $base = basename(setting('cert_signature'));
-    if ($base === '' || !preg_match('/^sign_[a-f0-9]+\.png$/', $base) || !is_file(ROOT . '/uploads/' . $base)) return '';
+    if ($base === '' || !preg_match('/^sign_[a-f0-9]+\.png$/', $base) || !is_file(ROOT . '/uploads/' . $base)) return null;
     $theme = $theme === 'light' ? 'light' : 'dark';
     $colored = substr($base, 0, -4) . '_' . $theme . '.png';
     if (!is_file(ROOT . '/uploads/' . $colored)) {
         $src = @imagecreatefrompng(ROOT . '/uploads/' . $base);
-        if (!$src) return '';
+        if (!$src) return null;
         [$r, $g, $b] = $theme === 'light' ? [11, 31, 69] : [243, 217, 139];
         $w = imagesx($src); $h = imagesy($src);
         $out = imagecreatetruecolor($w, $h);
@@ -75,7 +81,31 @@ function cert_signature_url(string $theme): string
         imagepng($out, ROOT . '/uploads/' . $colored, 6);
         imagedestroy($src); imagedestroy($out);
     }
-    return url('uploads/' . $colored);
+    return ROOT . '/uploads/' . $colored;
+}
+
+/** Logo: aceita JPG/PNG/WEBP, reduz para caber em $maxW x $maxH (nunca amplia) e salva em PNG com transparência. */
+function save_logo_image(array $f, string $prefix, int $maxW = 600, int $maxH = 240): ?string
+{
+    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
+    if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] > 5 * 1024 * 1024) throw new RuntimeException('Logo inválido ou maior que 5MB.');
+    $info = @getimagesize($f['tmp_name']);
+    $loaders = [IMAGETYPE_JPEG => 'imagecreatefromjpeg', IMAGETYPE_PNG => 'imagecreatefrompng', IMAGETYPE_WEBP => 'imagecreatefromwebp'];
+    if (!$info || !isset($loaders[$info[2]]) || $info[0] * $info[1] > 40_000_000) throw new RuntimeException('Use um logo em JPG, PNG ou WEBP.');
+    $src = @$loaders[$info[2]]($f['tmp_name']);
+    if (!$src) throw new RuntimeException('Não foi possível ler a imagem do logo.');
+    $w = imagesx($src); $h = imagesy($src);
+    $scale = min(1, $maxW / $w, $maxH / $h);
+    $nw = max(1, (int)round($w * $scale)); $nh = max(1, (int)round($h * $scale));
+    $out = imagecreatetruecolor($nw, $nh);
+    imagealphablending($out, false); imagesavealpha($out, true);
+    imagefill($out, 0, 0, imagecolorallocatealpha($out, 0, 0, 0, 127));
+    imagecopyresampled($out, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+    $name = $prefix . '_' . bin2hex(random_bytes(10)) . '.png';
+    $ok = imagepng($out, ROOT . '/uploads/' . $name, 6);
+    imagedestroy($src); imagedestroy($out);
+    if (!$ok) throw new RuntimeException('Falha ao salvar o logo.');
+    return $name;
 }
 
 function cert_seal_svg(): string
