@@ -1,0 +1,82 @@
+@font-face{font-family:"Cinzel";src:url("../fonts/Cinzel.ttf") format("truetype");font-weight:400 900;font-display:block}
+@font-face{font-family:"Great Vibes";src:url("../fonts/GreatVibes.ttf") format("truetype");font-display:block}
+@font-face{font-family:"Montserrat";src:url("../fonts/Montserrat.ttf") format("truetype");font-weight:100 900;font-display:block}
+@font-face{font-family:"Playfair Display";src:url("../fonts/PlayfairItalic.ttf") format("truetype");font-style:italic;font-weight:400 900;font-display:block}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body.cp{background:#12141c;font-family:"Montserrat",system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:22px 12px 40px}
+.cert-viewport{margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden}
+.actions{justify-content:center;margin-top:22px}
+.actions .btn{font-family:"Montserrat",sans-serif}
+.actions .btn-ghost{color:#cfd5e6}
+
+/* ---- folha A4 paisagem (297 x 210 mm) ---- */
+.certd{--bg1:#05070d;--bg2:#0b2247;--ink:#eef1f8;--muted:#9fa9c4;--gold:#d4af37;--gold2:#f3d98b;--frame:rgba(212,175,55,.9);--frame2:rgba(212,175,55,.35);--card:#fff;--sig:#f3d98b;
+  position:relative;width:297mm;height:210mm;overflow:hidden;color:var(--ink);transform-origin:top left;
+  background:radial-gradient(900px 520px at 100% 0%,var(--bg2) 0%,transparent 60%),radial-gradient(700px 420px at 0% 100%,rgba(15,42,94,.7) 0%,transparent 60%),linear-gradient(160deg,var(--bg1),#080b14)}
+.certd.theme-light{--bg1:#fffdf7;--bg2:#e4ebfa;--ink:#0b1f45;--muted:#58647f;--gold:#a67f15;--gold2:#c79f2c;--frame:#a67f15;--frame2:rgba(166,127,21,.35);--card:#fff;--sig:#0b1f45;
+  background:radial-gradient(900px 520px at 100% 0%,var(--bg2) 0%,transparent 62%),radial-gradient(700px 420px at 0% 100%,#f6ecd0 0%,transparent 62%),linear-gradient(160deg,var(--bg1),#f8f3e6)}
+.c-pattern{position:absolute;inset:0;opacity:.07;background:repeating-linear-gradient(135deg,var(--gold) 0 1px,transparent 1px 22px)}
+.theme-light .c-pattern{opacity:.06}
+.c-band{position:absolute;left:0;top:0;bottom:0;width:15mm;background:linear-gradient(180deg,var(--gold2),var(--gold) 55%,#7a5d10)}
+.theme-light .c-band{background:linear-gradient(180deg,#c79f2c,#a67f15 55%,#7a5d10)}
+.c-band::after{content:"";position:absolute;right:-1px;top:0;bottom:0;width:3mm;background:linear-gradient(90deg,transparent,rgba(0,0,0,.25))}
+.c-frame{position:absolute;left:22mm;top:9mm;right:9mm;bottom:9mm;border:.3mm solid var(--frame2)}
+.c-frame i{position:absolute;width:12mm;height:12mm;border:0 solid var(--frame)}
+.c-frame i.tl{left:-.3mm;top:-.3mm;border-width:.8mm 0 0 .8mm}.c-frame i.tr{right:-.3mm;top:-.3mm;border-width:.8mm .8mm 0 0}
+.c-frame i.bl{left:-.3mm;bottom:-.3mm;border-width:0 0 .8mm .8mm}.c-frame i.br{right:-.3mm;bottom:-.3mm;border-width:0 .8mm .8mm 0}
+
+.c-inner{position:absolute;left:30mm;top:15mm;right:17mm;bottom:14mm;display:flex;flex-direction:column;align-items:center;text-align:center}
+.c-head{display:flex;align-items:center;gap:4mm;height:13mm}
+.c-head img{max-height:13mm;max-width:46mm;object-fit:contain}
+.c-mark{width:9mm;height:9mm;transform:rotate(45deg);border:.6mm solid var(--gold);display:grid;place-items:center}
+.c-mark::after{content:"";width:3.2mm;height:3.2mm;background:var(--gold)}
+.c-org{font:600 3.1mm "Montserrat",sans-serif;letter-spacing:1.1mm;text-transform:uppercase;color:var(--gold2)}
+.theme-light .c-org{color:var(--gold)}
+.c-title{margin-top:6mm}
+.c-title h1{width:196mm;height:25.8mm;line-height:0}
+.c-title h1 svg{width:100%;height:100%;display:block;overflow:visible}
+.c-title h1 text{font:700 86px "Cinzel",serif;letter-spacing:9px}
+.tg1{stop-color:var(--gold)}.tg2{stop-color:var(--gold2)}
+.c-sub{display:flex;align-items:center;gap:5mm;justify-content:center;margin-top:1.5mm;font:500 3.6mm "Montserrat",sans-serif;letter-spacing:2.4mm;color:var(--muted);text-transform:uppercase}
+.c-sub span{width:28mm;height:.3mm;background:linear-gradient(90deg,transparent,var(--gold))}.c-sub span:last-child{transform:scaleX(-1)}
+.c-lead{font:italic 400 4.5mm "Playfair Display",serif;color:var(--muted);margin-top:6mm}
+.c-name{font:400 17mm/1.15 "Great Vibes",cursive;color:var(--ink);margin-top:1mm;padding:0 12mm 1mm;border-bottom:.35mm solid var(--gold);max-width:100%;white-space:nowrap}
+.c-cpf{font:500 3mm "Montserrat",sans-serif;letter-spacing:.5mm;color:var(--muted);margin-top:1.8mm}
+.c-course{font:700 8mm/1.2 "Cinzel",serif;letter-spacing:.6mm;color:var(--gold2);margin-top:2.2mm;max-width:210mm;text-transform:uppercase}
+.theme-light .c-course{color:var(--gold)}
+.c-stats{display:flex;gap:0;margin-top:7mm}
+.c-stats div{padding:0 9mm;text-align:center;border-left:.3mm solid var(--frame2)}.c-stats div:first-child{border-left:0}
+.c-stats b{display:block;font:600 5mm "Montserrat",sans-serif;color:var(--ink)}
+.c-stats small{display:block;font:500 2.4mm "Montserrat",sans-serif;letter-spacing:.9mm;text-transform:uppercase;color:var(--muted);margin-top:.8mm}
+
+.c-foot{position:absolute;left:0;right:0;bottom:7mm;display:flex;align-items:flex-end;justify-content:space-between}
+.c-qr{display:flex;align-items:center;gap:3.5mm;text-align:left}
+.c-qr .qrcard{background:var(--card);padding:1.6mm;border-radius:2mm;line-height:0;box-shadow:0 0 0 .35mm var(--frame2)}
+.c-qr .qrcard svg{width:25mm;height:25mm}
+.c-qr small{display:block;font:500 2.5mm/1.5 "Montserrat",sans-serif;color:var(--muted);max-width:56mm}
+.c-qr small b{color:var(--gold2);letter-spacing:.3mm}.theme-light .c-qr small b{color:var(--gold)}
+.c-seal{width:30mm;height:30mm;margin-bottom:-1mm}
+.c-seal svg{width:100%;height:100%;overflow:visible}
+.c-sign{width:68mm;text-align:center;display:flex;flex-direction:column;align-items:center}
+.c-sign .ink{height:16mm}
+.c-sign .inkimg{height:16mm;max-width:58mm;object-fit:contain;display:block}
+.c-sign .script{height:16mm;display:flex;align-items:flex-end;font:400 10mm/1 "Great Vibes",cursive;color:var(--sig);white-space:nowrap}
+.c-sign .line{width:100%;border-top:.35mm solid var(--gold);margin-top:1mm}
+.c-sign strong{font:600 3.5mm "Montserrat",sans-serif;margin-top:1.8mm;color:var(--ink)}
+.c-sign small{font:500 2.6mm "Montserrat",sans-serif;color:var(--muted);letter-spacing:.3mm;margin-top:.6mm}
+.c-meta{position:absolute;left:0;right:0;bottom:-3.5mm;font:500 2.2mm "Montserrat",sans-serif;color:var(--muted);letter-spacing:.3mm;opacity:.9}
+.c-meta i{font-style:normal;color:var(--gold)}
+.seal-edge{fill:var(--gold)}.seal-core{fill:var(--bg1)}.theme-light .seal-core{fill:#fffdf7}
+.seal-ring{fill:none;stroke:var(--gold);stroke-width:.6}
+.seal-text{font:600 6.2px "Cinzel",serif;fill:var(--gold2)}.theme-light .seal-text{fill:var(--gold)}
+.seal-star{fill:var(--gold2)}.theme-light .seal-star{fill:var(--gold)}
+
+@page{size:297mm 210mm;margin:0}
+@media print{
+  html,body{background:#fff!important;padding:0!important;margin:0!important}
+  body.cp{padding:0!important}
+  .cert-viewport{box-shadow:none!important;width:297mm!important;height:210mm!important;margin:0!important;overflow:hidden!important}
+  .certd{transform:none!important}
+}

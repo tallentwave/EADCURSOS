@@ -38,6 +38,13 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Admin**: lista de certificados com busca, **revogação/reativação** e CPF sempre mascarado. Em Configurações: razão social, CNPJ, assinatura do certificado e e-mail do encarregado (DPO).
 - Importante: configure o `base_url` correto (HTTPS) no instalador/`config.php`, pois é ele que vai dentro do QR Code.
 
+## Novidades da versão 5 — Novo certificado e correção da impressão/PDF
+- **Novo design** (A4 paisagem exato): tema **escuro** (preto, dourado e azul-marinho) ou **claro** (marfim, dourado e azul — economiza tinta), tipografia própria embutida (Cinzel, Great Vibes, Montserrat, Playfair; licença OFL, em `assets/fonts`), selo de autenticidade, QR Code, dados do curso (carga horária, aproveitamento, conclusão) e logo opcional.
+- **Assinatura da responsável**: Admin → Configurações → *Aparência do certificado*. Envie foto/scan da assinatura (tinta escura em fundo claro; PNG transparente é o ideal): o sistema **remove o fundo, recorta e pinta** na cor do tema. Sem imagem, o nome aparece em letra cursiva. Nome e cargo vêm de *Instituição, certificado e LGPD*.
+- **Prévia** do certificado com dados de exemplo (`Admin → Configurações → Pré-visualizar`), nos dois temas.
+- **Correção do botão Imprimir/Salvar PDF**: o botão usava `onclick` embutido, que a política de segurança do site (CSP) bloqueia. Agora usa tratadores no JavaScript externo. O mesmo bloqueio afetava a confirmação de *excluir módulo* e *remover comentário* e a troca de privacidade do certificado — todos corrigidos.
+- A impressão sai em **uma página A4 paisagem**, sem margens, com fontes embutidas e texto selecionável. Na janela de impressão escolha *Salvar como PDF*.
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar o mínimo de 90%. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 

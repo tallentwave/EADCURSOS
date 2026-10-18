@@ -7,6 +7,18 @@
     if (m && !window.confirm(m)) e.preventDefault();
   });
 
+  // ações declarativas (a política de segurança do site não permite onclick/onchange embutidos)
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-confirm-click],[data-print],[data-back]') : null;
+    if (!t) return;
+    if (t.hasAttribute('data-confirm-click') && !window.confirm(t.getAttribute('data-confirm-click'))) { e.preventDefault(); return; }
+    if (t.hasAttribute('data-print')) { e.preventDefault(); window.print(); }
+    if (t.hasAttribute('data-back') && window.history.length > 1) { e.preventDefault(); window.history.back(); }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-autosubmit') && e.target.form) e.target.form.submit();
+  });
+
   // marcar aula como concluída (AJAX)
   var btn = document.getElementById('btn-complete');
   if (btn) {

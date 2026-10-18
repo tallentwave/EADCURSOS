@@ -73,7 +73,7 @@ $st = ['pending' => ['Pendente', 'warn'], 'paid' => ['Pago', 'ok'], 'cancelled' 
       <?php if ($ce['status'] !== 'revoked'): ?><a class="btn btn-sm" href="<?= e(url('certificado.php?curso=' . $ce['course_id'])) ?>">Ver / imprimir</a><?php endif; ?>
       <a class="btn btn-ghost btn-sm" target="_blank" href="<?= e(cert_public_url($ce['code'])) ?>">Ver página pública</a></div>
     <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="cert_visibility"><input type="hidden" name="id" value="<?= (int)$ce['id'] ?>">
-      <label class="check"><input type="checkbox" name="show" value="1" <?= $ce['show_details'] ? 'checked' : '' ?> onchange="this.form.submit()"> Exibir meu nome completo, CPF parcial e aproveitamento na página pública de validação</label>
+      <label class="check"><input type="checkbox" name="show" value="1" <?= $ce['show_details'] ? 'checked' : '' ?> data-autosubmit> Exibir meu nome completo, CPF parcial e aproveitamento na página pública de validação</label>
       <noscript><button class="btn btn-sm">Salvar</button></noscript>
       <div class="hint">Desmarcado: a página pública mostra só o nome abreviado, o curso e as datas — sem CPF.</div></form></div>
   <?php endforeach; if (!$certs): ?><p class="hint" style="margin-bottom:14px">Você ainda não emitiu certificados.</p><?php endif; ?>

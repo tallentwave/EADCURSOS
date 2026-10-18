@@ -48,7 +48,7 @@ require ROOT . '/app/views/admin_header.php';
     <div style="flex:1;min-width:220px"><label>Módulo</label><input type="text" name="title" value="<?= e($m['title']) ?>"></div>
     <div style="width:90px"><label>Ordem</label><input type="number" name="position" value="<?= (int)$m['position'] ?>"></div>
     <button class="btn btn-sm" name="action" value="edit_module">Salvar</button>
-    <button class="btn btn-danger btn-sm" name="action" value="del_module" onclick="return confirm('Excluir módulo e suas aulas?')">Excluir</button>
+    <button class="btn btn-danger btn-sm" name="action" value="del_module" data-confirm-click="Excluir módulo e suas aulas?">Excluir</button>
     <?php $me = module_exam((int)$m['id']); ?><a class="btn btn-blue btn-sm" href="<?= e(url('admin/prova.php?curso=' . $cid . '&modulo=' . $m['id'])) ?>">&#128221; Prova <?= $me ? '(' . exam_qcount((int)$me['id']) . ' questões)' : '(criar)' ?></a>
   </form>
   <table style="margin-top:14px"><tr><th>Aula</th><th>Vídeo</th><th>Min</th><th>Grátis</th><th></th></tr>

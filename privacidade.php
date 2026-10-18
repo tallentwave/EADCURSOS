@@ -39,7 +39,7 @@ $cnpj = setting('company_cnpj');
 
 <h2 style="margin:22px 0 6px;color:var(--gold2)">7. Segurança</h2>
 <p>Senhas com hash seguro, CPF criptografado, conexão HTTPS, controle de acesso por curso, proteção contra tentativas abusivas de login e consulta de códigos.</p>
-<p style="margin-top:24px"><a class="btn btn-ghost btn-sm" href="javascript:history.back()">&laquo; Voltar</a></p>
+<p style="margin-top:24px"><a class="btn btn-ghost btn-sm" href="<?= e(url('')) ?>" data-back>&laquo; Voltar</a></p>
 </div></main>
 <footer class="foot">&copy; <?= date('Y') ?> <?= e(site_name()) ?></footer>
 </body></html>

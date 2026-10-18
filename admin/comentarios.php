@@ -26,6 +26,6 @@ require ROOT . '/app/views/admin_header.php';
 <p style="white-space:pre-wrap;margin:6px 0 10px"><?= e($r['body']) ?></p>
 <form method="post" style="display:flex;gap:8px;flex-wrap:wrap"><?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
 <input type="text" name="body" placeholder="Responder..." style="flex:1;min-width:220px"><button class="btn btn-sm" name="action" value="reply">Responder</button>
-<button class="btn btn-danger btn-sm" name="action" value="delete" onclick="return confirm('Remover comentário?')">Remover</button></form></div>
+<button class="btn btn-danger btn-sm" name="action" value="delete" data-confirm-click="Remover comentário?">Remover</button></form></div>
 <?php endforeach; if (!$rows): ?><p class="hint">Nenhum comentário ainda.</p><?php endif; ?>
 <?php require ROOT . '/app/views/admin_footer.php'; ?>
