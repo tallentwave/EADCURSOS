@@ -180,3 +180,14 @@ th{background:var(--navy);color:var(--gold);font-weight:600;font-size:.82rem;tex
 .watchbar .track{flex:0 0 160px;height:6px;background:#1d2a50;border-radius:4px;overflow:hidden}
 .watchbar .track i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s}
 .btn.disabled{pointer-events:none;opacity:.4}
+
+/* provas */
+.question{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;background:var(--black2)}
+.question legend{color:var(--gold);padding:0 8px;font-weight:600}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin:6px 0;border:1px solid #1c2748;border-radius:8px;cursor:pointer;color:var(--text);font-size:.98rem}
+.opt:hover{border-color:var(--gold);background:rgba(212,175,55,.06)}
+.opt input{width:auto;margin-top:5px}
+.exam-timer{position:sticky;top:64px;z-index:20;background:var(--navy);border:1px solid var(--gold);color:var(--gold2);padding:8px 16px;border-radius:8px;margin:12px 0;text-align:center}
+.exam-timer.low{background:#4a1114;border-color:var(--danger);color:#ffc9cb}
+.exam-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid #151b30;background:rgba(212,175,55,.05)}
+.exam-row .t{flex:1}

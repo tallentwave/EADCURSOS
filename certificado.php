@@ -4,8 +4,13 @@ $u = require_login();
 $uid = (int)$u['id'];
 $c = course_by_id((int)($_GET['curso'] ?? 0));
 if (!$c || !has_access($uid, (int)$c['id'])) { http_response_code(403); exit('Sem acesso.'); }
-$p = course_progress($uid, (int)$c['id']);
-if ($p['total'] === 0 || $p['pct'] < 100) { flash('err', 'Conclua 100% das aulas para emitir o certificado.'); redirect('curso.php?id=' . $c['id']); }
+$cert = q_one('SELECT * FROM certificates WHERE user_id = ? AND course_id = ?', [$uid, $c['id']]);
+if (!$cert) { // certificados já emitidos continuam válidos mesmo se provas forem criadas depois
+    [$eligible, $why] = certificate_eligible($uid, (int)$c['id']);
+    if (!$eligible) { flash('err', 'Certificado indisponível: ' . $why); redirect('curso.php?id=' . $c['id']); }
+}
+$fe = final_exam((int)$c['id']);
+$grade = $fe && exam_ready($fe) ? exam_best($uid, (int)$fe['id']) : null;
 
 $cert = q_one('SELECT * FROM certificates WHERE user_id = ? AND course_id = ?', [$uid, $c['id']]);
 if (!$cert) {
@@ -26,7 +31,7 @@ $hours = (int)q_val('SELECT COALESCE(SUM(l.duration_min),0) FROM lessons l JOIN 
   <div><span class="name"><?= e($u['name']) ?></span></div>
   <small>concluiu com êxito o curso</small>
   <div class="course"><?= e($c['title']) ?></div>
-  <small><?= $hours > 0 ? 'Carga horária: ' . round($hours / 60, 1) . ' h · ' : '' ?>Emitido em <?= e(date('d/m/Y', strtotime($cert['issued_at']))) ?></small>
+  <small><?= $hours > 0 ? 'Carga horária: ' . round($hours / 60, 1) . ' h · ' : '' ?><?= $grade !== null ? 'Aproveitamento na avaliação final: ' . rtrim(rtrim(number_format($grade, 2, ',', ''), '0'), ',') . '% · ' : '' ?>Emitido em <?= e(date('d/m/Y', strtotime($cert['issued_at']))) ?></small>
   <small>Código de verificação: <strong style="color:var(--gold)"><?= e($cert['code']) ?></strong> · <?= e(url('verificar.php')) ?></small>
 </div>
 <div class="no-print"><button class="btn" onclick="window.print()">Imprimir / Salvar PDF</button><a class="btn btn-ghost" style="color:#333" href="<?= e(url('curso.php?id=' . $c['id'])) ?>">Voltar</a></div>

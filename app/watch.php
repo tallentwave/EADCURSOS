@@ -31,10 +31,14 @@ function open_map(int $uid, int $courseId): array
     $u = current_user();
     $isAdmin = $u && (int)$u['id'] === $uid && $u['role'] === 'admin';
     $done = array_flip(array_column(q_all('SELECT lesson_id FROM progress WHERE user_id = ? AND completed = 1', [$uid]), 'lesson_id'));
-    $map = []; $prev = null;
+    $reqExam = required_module_exams($courseId); // module_id => exam_id
+    $passed = $reqExam ? passed_exam_set($uid) : [];
+    $map = []; $prev = null; $gate = false;
     foreach (course_lessons($courseId) as $l) {
         $id = (int)$l['id'];
-        $map[$id] = $isAdmin || $prev === null || isset($done[$prev['id']]) || (!lesson_has_video($prev) && $map[(int)$prev['id']]);
+        // prova obrigatória do módulo anterior ainda não aprovada trava os módulos seguintes
+        if ($prev && (int)$l['module_id'] !== (int)$prev['module_id'] && isset($reqExam[(int)$prev['module_id']]) && !isset($passed[$reqExam[(int)$prev['module_id']]])) $gate = true;
+        $map[$id] = $isAdmin || (!$gate && ($prev === null || isset($done[$prev['id']]) || (!lesson_has_video($prev) && $map[(int)$prev['id']])));
         $prev = $l;
     }
     return $map;

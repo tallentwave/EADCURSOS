@@ -8,7 +8,7 @@
 <title>Admin · <?= e(site_name()) ?></title><link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>"></head>
 <body><div class="admin">
 <aside><a class="brand" href="<?= e(url('admin/')) ?>">&#9670; <?= e(site_name()) ?></a>
-<?php foreach ($menu as $k => [$label, $file]): ?><a class="m <?= ($cur === $k || ($k === 'cursos' && in_array($cur, ['curso_edit', 'conteudo', 'aula_edit'], true))) ? 'on' : '' ?>" href="<?= e(url('admin/' . $file)) ?>"><?= e($label) ?></a><?php endforeach; ?>
+<?php foreach ($menu as $k => [$label, $file]): ?><a class="m <?= ($cur === $k || ($k === 'cursos' && in_array($cur, ['curso_edit', 'conteudo', 'aula_edit', 'prova'], true))) ? 'on' : '' ?>" href="<?= e(url('admin/' . $file)) ?>"><?= e($label) ?></a><?php endforeach; ?>
 <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
 <a class="m" href="<?= e(url('home.php')) ?>">Ver plataforma</a>
 <form method="post" action="<?= e(url('logout.php')) ?>"><?= csrf_field() ?><button class="btn btn-ghost btn-sm" style="margin:8px 14px">Sair</button></form>

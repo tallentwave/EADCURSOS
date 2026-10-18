@@ -50,5 +50,6 @@ require ROOT . '/app/payments.php';
 require ROOT . '/app/mailer.php';
 require ROOT . '/app/coupons.php';
 require ROOT . '/app/watch.php';
+require ROOT . '/app/exams.php';
 require ROOT . '/app/migrate.php';
 ensure_schema();

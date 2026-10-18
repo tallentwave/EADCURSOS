@@ -15,6 +15,7 @@ if (!has_access($uid, $cid) && !$lesson['is_free']) {
 $isOwner = has_access($uid, $cid);
 $openMap = $isOwner ? open_map($uid, $cid) : [];
 if ($isOwner && !($openMap[(int)$lesson['id']] ?? false)) {
+    if ($blk = first_blocking_exam($uid, $cid)) { flash('err', 'Faça a prova do módulo anterior para liberar esta aula.'); redirect('prova.php?id=' . $blk['id']); }
     flash('err', 'Assista pelo menos 90% da aula anterior para liberar esta.');
     $nl = next_lesson($uid, $cid);
     redirect($nl && $nl['id'] != $lesson['id'] ? 'aula.php?id=' . $nl['id'] : 'curso.php?id=' . $cid);
@@ -76,7 +77,12 @@ require ROOT . '/app/views/header.php';
           $nextOk = !$isOwner ? (bool)$next['is_free'] : (($openMap[$next['id']] ?? false) || $isDone); ?>
       <a id="btn-next" class="btn btn-ghost btn-sm <?= $nextOk ? '' : 'disabled' ?>" data-href="<?= e(url('aula.php?id=' . $next['id'])) ?>" <?= $nextOk ? 'href="' . e(url('aula.php?id=' . $next['id'])) . '"' : 'aria-disabled="true"' ?>>Próxima &raquo;</a><?php endif; ?>
       <a class="btn btn-ghost btn-sm" href="<?= e(url('curso.php?id=' . $cid)) ?>">Página do curso</a>
-      <?php if ($prog['pct'] === 100 && has_access($uid, $cid)): ?><a class="btn btn-blue btn-sm" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Certificado</a><?php endif; ?>
+      <?php if ($isOwner && certificate_eligible($uid, $cid)[0]): ?><a class="btn btn-blue btn-sm" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Certificado</a><?php endif; ?>
+      <?php $lastInModule = !$next || (int)$next['module_id'] !== (int)$lesson['module_id'];
+            $me = $lastInModule ? module_exam((int)$lesson['module_id']) : null;
+            $fe = !$next ? final_exam($cid) : null;
+            if (($isOwner || $u['role'] === 'admin') && exam_ready($me)): ?><a class="btn btn-blue btn-sm" href="<?= e(url('prova.php?id=' . $me['id'])) ?>">&#128221; Prova do módulo</a><?php endif; ?>
+      <?php if (($isOwner || $u['role'] === 'admin') && exam_ready($fe)): ?><a class="btn btn-blue btn-sm" href="<?= e(url('prova.php?id=' . $fe['id'])) ?>">&#128221; Avaliação final</a><?php endif; ?>
     </div>
     <?php if (trim((string)$lesson['description']) !== ''): ?>
       <div class="panel"><h3>Sobre esta aula</h3><p style="white-space:pre-wrap"><?= e($lesson['description']) ?></p></div>

@@ -27,7 +27,9 @@ require ROOT . '/app/views/header.php';
     <div class="meta"><?= count($mods) ?> módulos · <?= $prog['total'] ?> aulas</div>
     <?php if ($owned): ?>
       <a class="btn" href="<?= e(url($nl ? 'aula.php?id=' . $nl['id'] : 'home.php')) ?>">&#9654; <?= $prog['done'] ? 'Continuar curso' : 'Começar curso' ?></a>
-      <?php if ($prog['pct'] === 100): ?><a class="btn btn-blue" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Emitir certificado</a><?php endif; ?>
+      <?php [$certOk, $certWhy] = certificate_eligible($uid, $cid); $hasFinal = exam_ready(final_exam($cid)); ?>
+      <?php if ($certOk): ?><a class="btn btn-blue" href="<?= e(url('certificado.php?curso=' . $cid)) ?>">&#127942; Emitir certificado</a>
+      <?php elseif ($hasFinal || required_module_exams($cid)): ?><div class="meta">&#127942; Certificado: <?= e($certWhy) ?></div><?php endif; ?>
       <div class="bar" style="max-width:340px;margin-top:16px"><i style="width:<?= $prog['pct'] ?>%"></i></div>
       <div class="meta"><?= $prog['pct'] ?>% concluído</div>
     <?php else: ?>
@@ -65,7 +67,9 @@ require ROOT . '/app/views/header.php';
       <div class="lesson-item" style="opacity:.6" title="<?= $owned ? 'Assista a aula anterior para liberar' : 'Compre o curso para liberar' ?>"><span class="dot">&#128274;</span><span class="t"><?= e($l['title']) ?></span><small><?= $l['duration_min'] ? (int)$l['duration_min'] . ' min' : '' ?></small></div>
       <?php endif; ?>
     <?php endforeach; ?>
+    <?= exam_row_html(module_exam((int)$m['id']), $owned, $uid) ?>
   </details>
   <?php endforeach; ?>
+  <?php $fe = final_exam($cid); if (exam_ready($fe)): ?><details class="module" open><summary>Avaliação final</summary><?= exam_row_html($fe, $owned, $uid) ?></details><?php endif; ?>
 </div>
 <?php require ROOT . '/app/views/footer.php'; ?>

@@ -19,6 +19,16 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Vouchers**: lotes de códigos pré-pagos `XXXX-XXXX-XXXX` por curso, com validade e exportação CSV. O aluno resgata em `/resgatar.php`. Resgate atômico, uso único e limite de tentativas.
 - Bancos da versão 1 são atualizados automaticamente no primeiro acesso.
 
+## Novidades da versão 3 — Provas e certificado
+- **Prova por módulo** e **avaliação final** (Admin → Conteúdo → botão "Prova" em cada módulo / "Avaliação final").
+- Cada prova define: nota mínima, nº de tentativas (0 = ilimitadas), tempo limite, sorteio de N questões de um banco maior, embaralhamento e se é **obrigatória**.
+- **Prova obrigatória de módulo** trava o módulo seguinte até a aprovação. Prova opcional não trava nem entra no certificado.
+- **Avaliação final** libera o certificado: o aluno precisa concluir 100% das aulas, passar nas provas obrigatórias dos módulos e ser aprovado na final. Sem prova final cadastrada, vale a regra anterior (100% das aulas). O certificado mostra o aproveitamento.
+- Questões de **múltipla escolha com uma resposta correta** (2 a 6 alternativas).
+- Segurança: a correção é só no servidor (o gabarito nunca vai para o navegador, e o aluno vê apenas certo/errado), o tempo é controlado no servidor com 30 s de tolerância (fora disso a nota é 0), cada tentativa só pode ser enviada uma vez, alternativas fora da ordem sorteada são ignoradas e o aluno só faz a prova se tiver o curso e tiver concluído as aulas.
+- Admin vê resultados por prova (aprovados, média) e pode **zerar as tentativas** de um aluno.
+- Certificados já emitidos continuam válidos se provas forem criadas depois. Alunos que já estavam adiantados num curso passam a precisar das provas obrigatórias novas para abrir os módulos seguintes.
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar o mínimo de 90%. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 

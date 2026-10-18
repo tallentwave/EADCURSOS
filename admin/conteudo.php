@@ -34,7 +34,8 @@ require ROOT . '/app/views/admin_header.php';
 ?>
 <h1>Conteúdo: <?= e($c['title']) ?></h1>
 <div class="toolbar"><a class="btn btn-ghost btn-sm" href="<?= e(url('admin/cursos.php')) ?>">&laquo; Cursos</a>
-<a class="btn btn-ghost btn-sm" href="<?= e(url('admin/curso_edit.php?id=' . $cid)) ?>">Editar dados do curso</a></div>
+<a class="btn btn-ghost btn-sm" href="<?= e(url('admin/curso_edit.php?id=' . $cid)) ?>">Editar dados do curso</a>
+<?php $fe = final_exam($cid); ?><a class="btn btn-blue btn-sm" href="<?= e(url('admin/prova.php?curso=' . $cid . '&modulo=0')) ?>">&#127942; Avaliação final <?= $fe ? '(' . exam_qcount((int)$fe['id']) . ' questões)' : '(criar)' ?></a></div>
 
 <form class="formbox" method="post" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap"><?= csrf_field() ?>
 <input type="hidden" name="curso" value="<?= $cid ?>"><input type="hidden" name="action" value="add_module">
@@ -48,6 +49,7 @@ require ROOT . '/app/views/admin_header.php';
     <div style="width:90px"><label>Ordem</label><input type="number" name="position" value="<?= (int)$m['position'] ?>"></div>
     <button class="btn btn-sm" name="action" value="edit_module">Salvar</button>
     <button class="btn btn-danger btn-sm" name="action" value="del_module" onclick="return confirm('Excluir módulo e suas aulas?')">Excluir</button>
+    <?php $me = module_exam((int)$m['id']); ?><a class="btn btn-blue btn-sm" href="<?= e(url('admin/prova.php?curso=' . $cid . '&modulo=' . $m['id'])) ?>">&#128221; Prova <?= $me ? '(' . exam_qcount((int)$me['id']) . ' questões)' : '(criar)' ?></a>
   </form>
   <table style="margin-top:14px"><tr><th>Aula</th><th>Vídeo</th><th>Min</th><th>Grátis</th><th></th></tr>
   <?php foreach ($by[$m['id']] ?? [] as $l): ?><tr>

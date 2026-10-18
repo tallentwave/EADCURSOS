@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 /** Atualiza bancos de instalações anteriores. Idempotente; roda uma vez por versão. */
 function ensure_schema(): void
@@ -20,7 +20,7 @@ function ensure_schema(): void
     }
     $schema = file_get_contents(ROOT . '/install/schema.sql');
     foreach (array_filter(array_map('trim', explode(";\n", $schema))) as $sql) {
-        if (preg_match('/^CREATE TABLE IF NOT EXISTS (coupons|vouchers|lesson_watch)\b/', $sql)) db()->exec($sql);
+        if (preg_match('/^CREATE TABLE IF NOT EXISTS (coupons|vouchers|lesson_watch|exams|exam_questions|exam_options|exam_attempts)\b/', $sql)) db()->exec($sql);
     }
     set_setting('schema_version', (string)SCHEMA_VERSION);
 }
