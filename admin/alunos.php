@@ -44,7 +44,7 @@ if ($sel):
     $enIds = array_column($en, 'course_id');
 ?>
 <h1><?= e($sel['name']) ?></h1><a class="btn btn-ghost btn-sm" href="<?= e(url('admin/alunos.php')) ?>">&laquo; Alunos</a><br><br>
-<p><?= e($sel['email']) ?> · <?= $sel['status'] === 'active' ? 'Ativo' : 'Bloqueado' ?> · Cadastro <?= e(date('d/m/Y', strtotime($sel['created_at']))) ?></p><br>
+<p><?= e($sel['email']) ?> · CPF <?= e(cpf_mask(user_cpf($sel)) ?: 'não informado') ?> · <?= $sel['status'] === 'active' ? 'Ativo' : 'Bloqueado' ?> · Cadastro <?= e(date('d/m/Y', strtotime($sel['created_at']))) ?></p><br>
 <div class="grid2">
 <div class="formbox"><h2 style="margin:14px 0 6px">Cursos liberados</h2>
 <?php foreach ($en as $e): ?><div class="mat"><span style="flex:1"><?= e($e['title']) ?> <small style="color:var(--muted)">· <?= $e['source'] === 'purchase' ? 'compra' : 'manual' ?><?= $e['expires_at'] ? ' · expira ' . e(date('d/m/Y', strtotime($e['expires_at']))) : '' ?></small></span>

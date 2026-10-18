@@ -1,6 +1,6 @@
 <?php $cur = basename($_SERVER['SCRIPT_NAME'], '.php'); $menu = [
   'index' => ['Painel', 'index.php'], 'cursos' => ['Cursos', 'cursos.php'], 'alunos' => ['Alunos', 'alunos.php'],
-  'pedidos' => ['Pedidos', 'pedidos.php'], 'cupons' => ['Cupons', 'cupons.php'], 'vouchers' => ['Vouchers', 'vouchers.php'], 'comentarios' => ['Comentários', 'comentarios.php'], 'config' => ['Configurações', 'config.php'],
+  'pedidos' => ['Pedidos', 'pedidos.php'], 'certificados' => ['Certificados', 'certificados.php'], 'cupons' => ['Cupons', 'cupons.php'], 'vouchers' => ['Vouchers', 'vouchers.php'], 'comentarios' => ['Comentários', 'comentarios.php'], 'config' => ['Configurações', 'config.php'],
 ]; ?>
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

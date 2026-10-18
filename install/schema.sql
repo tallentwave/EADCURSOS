@@ -6,7 +6,11 @@ CREATE TABLE IF NOT EXISTS users (
   role ENUM('admin','student') NOT NULL DEFAULT 'student',
   status ENUM('active','blocked') NOT NULL DEFAULT 'active',
   created_at DATETIME NOT NULL,
-  last_login DATETIME NULL
+  last_login DATETIME NULL,
+  cpf_enc VARCHAR(255) NULL,
+  cpf_hash CHAR(64) NULL,
+  lgpd_consent_at DATETIME NULL,
+  KEY idx_cpf_hash (cpf_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS courses (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -102,6 +106,15 @@ CREATE TABLE IF NOT EXISTS certificates (
   course_id INT UNSIGNED NOT NULL,
   code VARCHAR(24) NOT NULL UNIQUE,
   issued_at DATETIME NOT NULL,
+  status ENUM('valid','revoked') NOT NULL DEFAULT 'valid',
+  revoked_at DATETIME NULL,
+  show_details TINYINT(1) NOT NULL DEFAULT 1,
+  holder_name VARCHAR(120) NULL,
+  holder_cpf_masked VARCHAR(20) NULL,
+  course_title VARCHAR(190) NULL,
+  workload_min INT NOT NULL DEFAULT 0,
+  final_score DECIMAL(5,2) NULL,
+  completed_at DATETIME NULL,
   UNIQUE KEY uq_cert (user_id, course_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE

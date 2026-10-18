@@ -10,6 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     set_setting('site_name', mb_substr(trim($_POST['site_name'] ?? '') ?: 'EAD Premium', 0, 60));
     set_setting('mp_sandbox', isset($_POST['mp_sandbox']) ? '1' : '0');
 
+    // instituição, assinatura do certificado e LGPD
+    foreach (['company_name' => 120, 'company_cnpj' => 24, 'cert_signer_name' => 120, 'cert_signer_role' => 120] as $k => $len) set_setting($k, mb_substr(trim($_POST[$k] ?? ''), 0, $len));
+    set_setting('dpo_email', filter_var($_POST['dpo_email'] ?? '', FILTER_VALIDATE_EMAIL) ?: '');
+
     // SMTP
     set_setting('mail_from', filter_var($_POST['mail_from'] ?? '', FILTER_VALIDATE_EMAIL) ?: '');
     $host = trim($_POST['smtp_host'] ?? '');
@@ -33,6 +37,14 @@ $enc = setting('smtp_enc', 'tls');
 <h1>Configurações</h1>
 <form class="formbox" method="post"><?= csrf_field() ?>
 <label>Nome da plataforma</label><input type="text" name="site_name" value="<?= e(site_name()) ?>">
+
+<h2 style="margin:26px 0 0;color:var(--gold)">Instituição, certificado e LGPD</h2>
+<div class="hint">Aparecem no certificado, na página pública de validação e na Política de Privacidade.</div>
+<div class="grid2"><div><label>Razão social / nome da instituição</label><input type="text" name="company_name" value="<?= e(setting('company_name')) ?>"></div>
+<div><label>CNPJ</label><input type="text" name="company_cnpj" value="<?= e(setting('company_cnpj')) ?>" placeholder="00.000.000/0001-00"></div>
+<div><label>Assinatura do certificado — nome</label><input type="text" name="cert_signer_name" value="<?= e(setting('cert_signer_name')) ?>"></div>
+<div><label>Assinatura — cargo</label><input type="text" name="cert_signer_role" value="<?= e(setting('cert_signer_role')) ?>" placeholder="Diretor(a) Acadêmico(a)"></div>
+<div><label>E-mail do encarregado de dados (DPO)</label><input type="email" name="dpo_email" value="<?= e(setting('dpo_email')) ?>" placeholder="privacidade@seudominio.com.br"></div></div>
 
 <h2 style="margin:26px 0 0;color:var(--gold)">E-mail (SMTP)</h2>
 <div class="hint">Usado em boas-vindas, recuperação de senha e confirmação de compra. Sem SMTP o sistema tenta a função mail() do servidor.</div>

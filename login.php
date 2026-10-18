@@ -37,5 +37,5 @@ $title = 'Entrar';
 <label for="email">E-mail</label><input id="email" type="email" name="email" required autofocus value="<?= e($_POST['email'] ?? '') ?>">
 <label for="password">Senha</label><input id="password" type="password" name="password" required>
 <br><button class="btn btn-block">Entrar</button>
-<div class="links"><a href="<?= e(url('esqueci.php')) ?>">Esqueci minha senha</a><br><br>Ainda não tem conta? <a href="<?= e(url('registro.php')) ?>">Cadastre-se</a></div>
+<div class="links"><a href="<?= e(url('esqueci.php')) ?>">Esqueci minha senha</a><br><br>Ainda não tem conta? <a href="<?= e(url('registro.php')) ?>">Cadastre-se</a><br><br><small><a href="<?= e(url('verificar.php')) ?>">Validar certificado</a> · <a href="<?= e(url('privacidade.php')) ?>">Privacidade</a></small></div>
 </form></div></body></html>

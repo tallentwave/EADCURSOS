@@ -29,6 +29,15 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - Admin vê resultados por prova (aprovados, média) e pode **zerar as tentativas** de um aluno.
 - Certificados já emitidos continuam válidos se provas forem criadas depois. Alunos que já estavam adiantados num curso passam a precisar das provas obrigatórias novas para abrir os módulos seguintes.
 
+## Novidades da versão 4 — Certificado com QR Code e LGPD
+- **QR Code** no certificado (gerado no servidor, em SVG, funciona impresso/PDF) que abre a **página pública do certificado** em `/verificar.php?codigo=...`. Também dá para digitar o código manualmente.
+- **Página pública**: mostra selo de válido/revogado, titular, **CPF parcial** (`***.123.456-**`), curso, carga horária, aproveitamento final, datas e instituição. **Nunca** mostra e-mail, CPF completo, telefone, IP, pagamentos ou notas por módulo. Não é indexada por buscadores (`noindex`) e as consultas têm limite contra varredura de códigos.
+- **Dados congelados na emissão**: o certificado guarda nome, CPF parcial, curso, carga e nota do momento. Mudar o nome depois não altera um certificado já emitido. Certificados antigos são migrados automaticamente.
+- **CPF**: validado, gravado **criptografado** (AES-256-GCM) e com hash para impedir duplicidade; só é exibido mascarado. Obrigatório apenas para emitir certificado.
+- **LGPD**: aceite da Política de Privacidade no cadastro (com data registrada), página `/privacidade.php`, e em *Minha conta*: modo reservado do certificado (só nome abreviado, sem CPF), **baixar meus dados** (JSON) e **excluir minha conta** (dados pessoais, progresso, comentários e certificados são removidos; pedidos ficam anonimizados por obrigação fiscal).
+- **Admin**: lista de certificados com busca, **revogação/reativação** e CPF sempre mascarado. Em Configurações: razão social, CNPJ, assinatura do certificado e e-mail do encarregado (DPO).
+- Importante: configure o `base_url` correto (HTTPS) no instalador/`config.php`, pois é ele que vai dentro do QR Code.
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar o mínimo de 90%. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 
