@@ -19,9 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($a === 'add_lesson' && $owns($mid) && trim($_POST['title'] ?? '') !== '') {
         $pos = (int)q_val('SELECT COALESCE(MAX(position),0)+1 FROM lessons WHERE module_id = ?', [$mid]);
         $v = trim($_POST['video_url'] ?? '');
+        [$sf, $serr] = lesson_schedule_fields($_POST);
         if ($v !== '' && !video_embed($v)) flash('err', 'Link de vídeo inválido: use YouTube ou Vimeo.');
-        else q('INSERT INTO lessons (module_id, title, video_url, duration_min, position, is_free) VALUES (?,?,?,?,?,?)',
-            [$mid, trim($_POST['title']), $v, max(0, (int)($_POST['duration_min'] ?? 0)), $pos, isset($_POST['is_free']) ? 1 : 0]);
+        elseif ($serr !== '') flash('err', $serr);
+        else {
+            q('INSERT INTO lessons (module_id, title, video_url, duration_min, position, is_free, lesson_type, starts_at, live_url, live_required, release_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                [$mid, trim($_POST['title']), $v, max(0, (int)($_POST['duration_min'] ?? 0)), $pos, isset($_POST['is_free']) ? 1 : 0, $sf['lesson_type'], $sf['starts_at'], $sf['live_url'], $sf['live_required'], $sf['release_at']]);
+            if ($sf['lesson_type'] === 'live' && !$sf['live_url']) flash('info', 'Aula ao vivo criada. Lembre-se de colocar o link da sala em "Editar" antes da transmissão.');
+        }
     } elseif ($a === 'del_lesson') {
         q('DELETE l FROM lessons l JOIN modules m ON m.id = l.module_id WHERE l.id = ? AND m.course_id = ?', [(int)$_POST['lesson_id'], $cid]);
     }
@@ -51,19 +56,28 @@ require ROOT . '/app/views/admin_header.php';
     <button class="btn btn-danger btn-sm" name="action" value="del_module" data-confirm-click="Excluir módulo e suas aulas?">Excluir</button>
     <?php $me = module_exam((int)$m['id']); ?><a class="btn btn-blue btn-sm" href="<?= e(url('admin/prova.php?curso=' . $cid . '&modulo=' . $m['id'])) ?>">&#128221; Prova <?= $me ? '(' . exam_qcount((int)$me['id']) . ' questões)' : '(criar)' ?></a>
   </form>
-  <table style="margin-top:14px"><tr><th>Aula</th><th>Vídeo</th><th>Min</th><th>Grátis</th><th></th></tr>
+  <table style="margin-top:14px"><tr><th>Aula</th><th>Tipo / quando</th><th>Vídeo</th><th>Min</th><th>Grátis</th><th></th></tr>
   <?php foreach ($by[$m['id']] ?? [] as $l): ?><tr>
-    <td><?= e($l['title']) ?></td><td><?= video_embed($l['video_url']) ? '&#10003;' : '<span style="color:var(--danger)">sem vídeo</span>' ?></td>
+    <td><?= e($l['title']) ?></td>
+    <td><?php if (lesson_is_live($l)): $st = live_state($l); ?><span class="tag-s tag-<?= in_array($st, ['live', 'soon'], true) ? 'bad' : 'warn' ?>">&#128308; Ao vivo</span> <small><?= $l['starts_at'] ? e(live_short($l['starts_at'])) : 'sem data' ?></small><?= $l['live_url'] ? '' : ' <small style="color:var(--danger)">· sem link</small>' ?>
+      <?php elseif ($l['release_at']): ?><span class="tag-s tag-warn">&#128197; Libera</span> <small><?= e(live_short($l['release_at'])) ?></small>
+      <?php else: ?><small style="color:var(--muted)">Gravada</small><?php endif; ?></td>
+    <td><?= video_embed($l['video_url']) ? '&#10003;' : (lesson_is_live($l) ? '<small style="color:var(--muted)">gravação opcional</small>' : '<span style="color:var(--danger)">sem vídeo</span>') ?></td>
     <td><?= (int)$l['duration_min'] ?></td><td><?= $l['is_free'] ? 'Sim' : '—' ?></td>
     <td style="white-space:nowrap"><a class="btn btn-blue btn-sm" href="<?= e(url('admin/aula_edit.php?id=' . $l['id'])) ?>">Editar / materiais</a>
     <form class="inline" method="post" data-confirm="Excluir esta aula?"><?= csrf_field() ?><input type="hidden" name="curso" value="<?= $cid ?>"><input type="hidden" name="action" value="del_lesson"><input type="hidden" name="lesson_id" value="<?= (int)$l['id'] ?>"><button class="btn btn-danger btn-sm">Excluir</button></form></td></tr>
   <?php endforeach; ?></table>
-  <form method="post" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:8px"><?= csrf_field() ?>
+  <form method="post" data-lesson-form style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:8px"><?= csrf_field() ?>
     <input type="hidden" name="curso" value="<?= $cid ?>"><input type="hidden" name="module_id" value="<?= (int)$m['id'] ?>"><input type="hidden" name="action" value="add_lesson">
     <div style="flex:2;min-width:200px"><label>Nova aula</label><input type="text" name="title" required placeholder="Título da aula"></div>
-    <div style="flex:2;min-width:220px"><label>Link YouTube/Vimeo</label><input type="url" name="video_url" placeholder="https://www.youtube.com/watch?v=..."></div>
+    <div style="min-width:170px"><label>Tipo</label><select name="lesson_type" data-lesson-type><option value="video">Gravada (vídeo)</option><option value="live">Ao vivo / agendada</option></select></div>
+    <div class="only-video" style="flex:2;min-width:220px"><label>Link YouTube/Vimeo</label><input type="url" name="video_url" placeholder="https://www.youtube.com/watch?v=..."></div>
+    <div class="only-video" style="min-width:200px"><label>Liberar em (opcional)</label><input type="datetime-local" name="release_at"></div>
+    <div class="only-live" style="min-width:210px" hidden><label>Data e hora da aula</label><input type="datetime-local" name="starts_at"></div>
+    <div class="only-live" style="flex:2;min-width:240px" hidden><label>Link da sala (Zoom, Meet, Teams, YouTube ao vivo)</label><input type="url" name="live_url" placeholder="https://meet.google.com/abc-defg-hij"></div>
     <div style="width:90px"><label>Minutos</label><input type="number" name="duration_min" min="0" value="0"></div>
     <label class="check" style="margin-bottom:10px"><input type="checkbox" name="is_free"> Aula grátis</label>
+    <label class="check only-live" style="margin-bottom:10px" hidden><input type="checkbox" name="live_required"> Presença obrigatória</label>
     <button class="btn btn-sm">+ Aula</button></form>
 </div>
 <?php endforeach; if (!$mods): ?><p class="hint">Crie o primeiro módulo acima.</p><?php endif; ?>

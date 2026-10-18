@@ -41,7 +41,7 @@ h1,h2,h3{font-family:Georgia,"Times New Roman",serif;letter-spacing:.2px}
 
 /* forms */
 label{display:block;margin:14px 0 6px;font-size:.88rem;color:var(--muted)}
-input[type=text],input[type=email],input[type=password],input[type=number],input[type=url],input[type=file],select,textarea{width:100%;padding:11px 13px;border-radius:7px;border:1px solid #26304d;background:#0b1020;color:var(--text);font:inherit}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=url],input[type=file],input[type=datetime-local],select,textarea{color-scheme:dark;width:100%;padding:11px 13px;border-radius:7px;border:1px solid #26304d;background:#0b1020;color:var(--text);font:inherit}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:transparent}
 textarea{min-height:110px;resize:vertical}
 .check{display:flex;gap:8px;align-items:center;margin-top:14px;color:var(--text)}
@@ -207,12 +207,11 @@ th{background:var(--navy);color:var(--gold);font-weight:600;font-size:.82rem;tex
 
 /* logo do site */
 .brand{display:inline-flex;align-items:center;gap:8px}
-.brand-logo{height:38px;width:auto;max-width:190px;object-fit:contain;display:block}
+.brand-logo{height:28px;width:auto;max-width:150px;object-fit:contain;display:block}
 .brand-name{display:inline-block}
 .auth-box h1 .auth-logo{display:block;margin:0 auto 10px;height:auto;max-height:84px;max-width:240px;width:auto;object-fit:contain}
 .auth-box h1 .brand-name{display:block;font-size:1.3rem}
-.hero-logo{display:block;max-height:64px;max-width:240px;width:auto;margin-bottom:18px;object-fit:contain}
-.admin aside .brand-logo{max-width:170px}
+.admin aside .brand-logo{max-width:140px}
 .auth-logo-top{display:block;margin:0 auto 12px;max-height:70px;max-width:220px;width:auto;object-fit:contain}
 
 /* carteirinha */
@@ -222,3 +221,29 @@ th{background:var(--navy);color:var(--gold);font-weight:600;font-size:.82rem;tex
 .card-prev figcaption{text-align:center;color:var(--muted);font-size:.82rem;margin-top:8px;letter-spacing:.1em;text-transform:uppercase}
 @media(max-width:700px){.card-prev{grid-template-columns:1fr}}
 .brand .brand-name{color:var(--gold);-webkit-text-stroke:0;text-shadow:none}
+[hidden]{display:none!important}
+
+/* aulas ao vivo / agendadas */
+.live-panel{border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:16px;background:linear-gradient(135deg,var(--navy3),var(--black2))}
+.live-panel.state-live,.live-panel.state-soon,.live-panel.state-late{border-color:var(--danger);box-shadow:0 0 0 1px rgba(229,72,77,.4),0 10px 40px rgba(229,72,77,.12)}
+.live-kicker{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:700}
+.state-live .live-kicker,.state-soon .live-kicker,.state-late .live-kicker{color:#ff8a8e}
+.live-panel h2{font-size:1.45rem;margin:6px 0 4px}
+.live-meta{color:var(--muted);font-size:.9rem}
+.live-count{color:var(--gold2);font-weight:600;font-size:1.05rem;margin:8px 0 2px}
+.live-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.btn-live{background:linear-gradient(135deg,#e5484d,#b3262b);color:#fff;font-size:1.02rem;padding:13px 26px}
+.btn-live:hover{color:#fff}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.live-note{color:var(--muted);font-size:.92rem}
+.live-presence{margin-top:12px;color:var(--ok);font-size:.9rem}
+.live-mini{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+.live-tag{margin-left:6px;vertical-align:middle;font-size:.68rem}
+.live-cards{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 16px;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.live-card{flex:0 0 clamp(250px,26vw,330px);display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:var(--radius);background:var(--navy3);border:1px solid #1c2748;color:var(--text);transition:.2s}
+.live-card:hover{border-color:var(--gold);color:var(--text);transform:translateY(-2px)}
+.live-card.on{border-color:var(--danger);box-shadow:0 0 0 1px rgba(229,72,77,.35)}
+.lc-date{flex:none;width:56px;text-align:center;background:var(--black);border:1px solid var(--line);border-radius:10px;padding:6px 0}
+.lc-date b{display:block;font:700 1.5rem Georgia,serif;color:var(--gold);line-height:1.1}.lc-date small{font-size:.68rem;letter-spacing:.1em;color:var(--muted)}
+.lc-info{display:flex;flex-direction:column;gap:2px;min-width:0}.lc-info strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-info small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lc-now{color:#ff8a8e}

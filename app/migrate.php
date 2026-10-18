@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 /** Atualiza bancos de instalações anteriores. Idempotente; roda uma vez por versão. */
 function ensure_schema(): void
@@ -16,6 +16,12 @@ function ensure_schema(): void
         "ALTER TABLE users ADD COLUMN cpf_hash CHAR(64) NULL",
         "ALTER TABLE users ADD COLUMN lgpd_consent_at DATETIME NULL",
         "ALTER TABLE users ADD KEY idx_cpf_hash (cpf_hash)",
+        "ALTER TABLE lessons ADD COLUMN lesson_type ENUM('video','live') NOT NULL DEFAULT 'video'",
+        "ALTER TABLE lessons ADD COLUMN starts_at DATETIME NULL",
+        "ALTER TABLE lessons ADD COLUMN live_url VARCHAR(500) NULL",
+        "ALTER TABLE lessons ADD COLUMN live_required TINYINT(1) NOT NULL DEFAULT 0",
+        "ALTER TABLE lessons ADD COLUMN release_at DATETIME NULL",
+        "ALTER TABLE lessons ADD COLUMN reminder_sent_at DATETIME NULL",
         "ALTER TABLE users ADD COLUMN photo VARCHAR(80) NULL",
         "ALTER TABLE users ADD COLUMN photo_consent_at DATETIME NULL",
         "ALTER TABLE certificates ADD COLUMN status ENUM('valid','revoked') NOT NULL DEFAULT 'valid'",
@@ -35,7 +41,7 @@ function ensure_schema(): void
     }
     $schema = file_get_contents(ROOT . '/install/schema.sql');
     foreach (array_filter(array_map('trim', explode(";\n", $schema))) as $sql) {
-        if (preg_match('/^CREATE TABLE IF NOT EXISTS (coupons|vouchers|lesson_watch|exams|exam_questions|exam_options|exam_attempts)\b/', $sql)) db()->exec($sql);
+        if (preg_match('/^CREATE TABLE IF NOT EXISTS (coupons|vouchers|lesson_watch|exams|exam_questions|exam_options|exam_attempts|live_attendance)\b/', $sql)) db()->exec($sql);
     }
     // certificados antigos: congela os dados do titular no momento da migração
     foreach (q_all('SELECT ce.id, u.name, c.title, c.id AS cid FROM certificates ce JOIN users u ON u.id = ce.user_id JOIN courses c ON c.id = ce.course_id WHERE ce.holder_name IS NULL') as $r) {

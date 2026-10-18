@@ -45,6 +45,12 @@ CREATE TABLE IF NOT EXISTS lessons (
   duration_sec INT NOT NULL DEFAULT 0,
   position INT NOT NULL DEFAULT 0,
   is_free TINYINT(1) NOT NULL DEFAULT 0,
+  lesson_type ENUM('video','live') NOT NULL DEFAULT 'video',
+  starts_at DATETIME NULL,
+  live_url VARCHAR(500) NULL,
+  live_required TINYINT(1) NOT NULL DEFAULT 0,
+  release_at DATETIME NULL,
+  reminder_sent_at DATETIME NULL,
   FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS materials (
@@ -222,4 +228,12 @@ CREATE TABLE IF NOT EXISTS exam_attempts (
   KEY idx_user_exam (user_id, exam_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS live_attendance (
+  user_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NOT NULL,
+  joined_at DATETIME NOT NULL,
+  PRIMARY KEY (user_id, lesson_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

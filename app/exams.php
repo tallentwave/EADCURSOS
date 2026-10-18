@@ -32,8 +32,9 @@ function required_module_exams(int $courseId): array
 
 function module_done(int $uid, int $moduleId): bool
 {
-    $total = (int)q_val('SELECT COUNT(*) FROM lessons WHERE module_id = ?', [$moduleId]);
-    $done = (int)q_val('SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id WHERE p.user_id = ? AND l.module_id = ? AND p.completed = 1', [$uid, $moduleId]);
+    $counted = 'NOT (l.lesson_type = "live" AND l.live_required = 0)';
+    $total = (int)q_val("SELECT COUNT(*) FROM lessons l WHERE l.module_id = ? AND $counted", [$moduleId]);
+    $done = (int)q_val("SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id WHERE p.user_id = ? AND l.module_id = ? AND p.completed = 1 AND $counted", [$uid, $moduleId]);
     return $done >= $total;
 }
 

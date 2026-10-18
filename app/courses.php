@@ -28,9 +28,10 @@ function course_lessons(int $courseId): array
 /** @return array{total:int,done:int,pct:int} */
 function course_progress(int $uid, int $courseId): array
 {
-    $total = (int)q_val('SELECT COUNT(*) FROM lessons l JOIN modules m ON m.id = l.module_id WHERE m.course_id = ?', [$courseId]);
-    $done = (int)q_val('SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id
-                        WHERE p.user_id = ? AND m.course_id = ? AND p.completed = 1', [$uid, $courseId]);
+    $counted = 'NOT (l.lesson_type = "live" AND l.live_required = 0)';   // ao vivo opcional não conta
+    $total = (int)q_val("SELECT COUNT(*) FROM lessons l JOIN modules m ON m.id = l.module_id WHERE m.course_id = ? AND $counted", [$courseId]);
+    $done = (int)q_val("SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id
+                        WHERE p.user_id = ? AND m.course_id = ? AND p.completed = 1 AND $counted", [$uid, $courseId]);
     return ['total' => $total, 'done' => $done, 'pct' => $total ? (int)floor($done * 100 / $total) : 0];
 }
 
@@ -42,7 +43,7 @@ function next_lesson(int $uid, int $courseId): ?array
     $first = null;
     foreach (course_lessons($courseId) as $l) {
         $first ??= $l;
-        if (!isset($done[$l['id']])) return $l;
+        if (!isset($done[$l['id']]) && lesson_counts_for_completion($l)) return $l;   // ao vivo opcional não é "a próxima"
     }
     return $first;
 }

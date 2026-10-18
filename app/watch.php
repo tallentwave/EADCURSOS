@@ -62,7 +62,8 @@ function open_map(int $uid, int $courseId): array
         $id = (int)$l['id'];
         // prova obrigatória do módulo anterior ainda não aprovada trava os módulos seguintes
         if ($prev && (int)$l['module_id'] !== (int)$prev['module_id'] && isset($reqExam[(int)$prev['module_id']]) && !isset($passed[$reqExam[(int)$prev['module_id']]])) $gate = true;
-        $map[$id] = $isAdmin || (!$gate && ($prev === null || isset($done[$prev['id']]) || (!lesson_has_video($prev) && $map[(int)$prev['id']])));
+        $released = empty($l['release_at']) || strtotime((string)$l['release_at']) <= time();   // aula com liberação agendada
+        $map[$id] = $isAdmin || (!$gate && $released && ($prev === null || isset($done[$prev['id']]) || (!lesson_gates($prev) && $map[(int)$prev['id']])));
         $prev = $l;
     }
     return $map;
@@ -117,6 +118,7 @@ function watch_guard(array $user, int $lessonId): array
     if ($user['role'] === 'admin') return [$lesson, 'admin'];
     $course = course_by_id($cid);
     if (!$course || $course['status'] !== 'published') json_fail(404, 'Curso indisponível.');
+    if (lesson_is_live($lesson) && !live_replay_open($lesson)) json_fail(403, 'A gravação fica disponível depois do término da aula ao vivo.');
     if (has_access($uid, $cid)) {
         if (!(open_map($uid, $cid)[$lessonId] ?? false)) json_fail(403, 'Conclua a aula anterior para liberar esta.');
         return [$lesson, ''];

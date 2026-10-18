@@ -26,7 +26,8 @@ require ROOT . '/app/views/header.php';
     <span class="tag" style="color:var(--gold)"><?= e($c['category']) ?></span>
     <h1><?= e($c['title']) ?></h1>
     <p><?= e($c['short_desc']) ?></p>
-    <div class="meta"><?= count($mods) ?> módulos · <?= $prog['total'] ?> aulas</div>
+    <?php $allCount = array_sum(array_map('count', $lessonsBy)); $liveCount = count(array_filter(array_merge(...array_values($lessonsBy ?: [[]])), 'lesson_is_live')); ?>
+    <div class="meta"><?= count($mods) ?> <?= count($mods) === 1 ? 'módulo' : 'módulos' ?> · <?= $allCount ?> <?= $allCount === 1 ? 'aula' : 'aulas' ?><?= $liveCount ? ' · ' . $liveCount . ' ao vivo' : '' ?></div>
     <?php if ($owned): ?>
       <a class="btn" href="<?= e(url($nl ? 'aula.php?id=' . $nl['id'] : 'home.php')) ?>">&#9654; <?= $prog['done'] ? 'Continuar curso' : 'Começar curso' ?></a>
       <?php [$certOk, $certWhy] = certificate_eligible($uid, $cid); $hasFinal = exam_ready(final_exam($cid)); ?>
@@ -67,16 +68,20 @@ require ROOT . '/app/views/header.php';
         $can = $owned ? ($openMap[$l['id']] ?? false) : (bool)$l['is_free'];
         $done = isset($doneSet[$l['id']]); ?>
       <?php $lp = $done ? 100 : (int)($pcts[$l['id']] ?? 0); $dur = lesson_duration($l);
-            $durTxt = $dur >= 60 ? fmt_workload((int)round($dur / 60)) : ($dur > 0 ? (int)$dur . ' s' : ''); ?>
+            $durTxt = $dur >= 60 ? fmt_workload((int)round($dur / 60)) : ($dur > 0 ? (int)$dur . ' s' : '');
+            $isL = lesson_is_live($l); $relFuture = !empty($l['release_at']) && strtotime((string)$l['release_at']) > time();
+            $badge = $isL ? ($l['starts_at'] ? '<span class="tag-s tag-bad live-tag">&#128308; AO VIVO · ' . e(live_short($l['starts_at'])) . '</span>' : '<span class="tag-s tag-bad live-tag">&#128308; AO VIVO</span>')
+                          : ($relFuture ? '<span class="tag-s tag-warn live-tag">&#128197; Libera ' . e(live_short($l['release_at'])) . '</span>' : '');
+            if ($isL && $l['starts_at']) $durTxt = ''; ?>
       <?php if ($can): ?>
       <a class="lesson-item <?= $done ? 'done' : '' ?>" href="<?= e(url('aula.php?id=' . $l['id'])) ?>">
         <span class="dot"><?= $done ? '&#10003;' : '' ?></span>
-        <span class="t"><?= e($l['title']) ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+        <span class="t"><?= e($l['title']) ?> <?= $badge ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
         <small><?= $l['is_free'] && !$owned ? 'Grátis · ' : '' ?><?= e($durTxt) ?><?= $owned ? ' · <b class="lpctb">' . $lp . '%</b>' : '' ?></small>
       </a>
       <?php else: ?>
       <div class="lesson-item locked" title="<?= $owned ? 'Assista a aula anterior até o final para liberar' : 'Adquira o curso para liberar' ?>"><span class="dot">&#128274;</span>
-        <span class="t"><?= e($l['title']) ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+        <span class="t"><?= e($l['title']) ?> <?= $badge ?><?php if ($owned): ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
         <small><?= e($durTxt) ?><?= $owned ? ' · <b class="lpctb">' . $lp . '%</b>' : '' ?></small></div>
       <?php endif; ?>
     <?php endforeach; ?>

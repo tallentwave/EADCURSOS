@@ -60,6 +60,16 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - A carteirinha deixa de existir se o certificado for **revogado**; respeita o **modo reservado** (sem CPF) e a foto entra na exportação e na exclusão de dados (LGPD).
 - Em hospedagens Nginx, bloqueie também `/storage` (a criptografia protege as fotos mesmo se isso for esquecido).
 
+## Novidades da versão 8 — Aulas ao vivo e agendadas
+- **Tipo da aula** (Admin → Conteúdo → *Nova aula* → Tipo): **Gravada (vídeo)** ou **Ao vivo / agendada**. Na aula ao vivo você informa data e hora (horário de Brasília), duração em minutos e o **link da sala** (Zoom, Google Meet, Teams, YouTube ao vivo...). O link também pode ser colocado depois, em *Editar*.
+- **Entrada segura**: o link da sala **não aparece no código da página**. O aluno clica em *Entrar na aula ao vivo*, o sistema confere matrícula e horário e redireciona. O botão libera **15 min antes** do início e fica ativo até **1 h depois do fim previsto**. Só `http://`/`https://` são aceitos.
+- **Presença**: entrar na sala registra a presença do aluno (lista no admin, em *Editar aula*) e conclui a aula. *Presença obrigatória* marcada = a próxima aula só abre para quem entrou ou assistiu à gravação; desmarcada (padrão) = a aula é opcional e **não trava** o aluno, nem entra na conta de "100% do curso", nas provas ou no certificado.
+- **Gravação (replay)**: o campo de vídeo vira o link da gravação, que só fica disponível **depois do fim** da transmissão, com o mesmo player protegido.
+- **Contagem regressiva** e atualização automática da tela (sala aberta / ao vivo / encerrada), com o relógio do servidor.
+- **Aviso ao aluno**: seção *Próximas aulas ao vivo* na home, etiquetas "AO VIVO · data" na lista de aulas, arquivo de calendário (.ics, com lembrete 15 min antes) e botão **Enviar lembrete por e-mail** a todos os matriculados (usa o SMTP; reenvio só após 10 min).
+- **Conteúdo agendado**: aulas gravadas aceitam *Liberar em (data/hora)*; antes disso aparecem com cadeado e a data.
+- **Logo**: menor no topo (28 px) e sem logo em destaque na home.
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar a regra de assistir a aula inteira. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 

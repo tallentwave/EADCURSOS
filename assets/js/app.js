@@ -19,6 +19,17 @@
     if (e.target.hasAttribute && e.target.hasAttribute('data-autosubmit') && e.target.form) e.target.form.submit();
   });
 
+  // formulário de aula: mostra os campos de "ao vivo" ou de "gravada" conforme o tipo
+  document.querySelectorAll('[data-lesson-type]').forEach(function (sel) {
+    var f = sel.form;
+    function apply() {
+      var live = sel.value === 'live';
+      f.querySelectorAll('.only-live').forEach(function (el) { el.hidden = !live; });
+      f.querySelectorAll('.only-video').forEach(function (el) { el.hidden = live; });
+    }
+    sel.addEventListener('change', apply); apply();
+  });
+
   // marcar aula como concluída (AJAX)
   var btn = document.getElementById('btn-complete');
   if (btn) {

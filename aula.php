@@ -17,7 +17,8 @@ $openMap = $isOwner ? open_map($uid, $cid) : [];
 $pcts = $isOwner ? lesson_pcts($uid, $cid) : [];
 if ($isOwner && !($openMap[(int)$lesson['id']] ?? false)) {
     if ($blk = first_blocking_exam($uid, $cid)) { flash('err', 'Faça a prova do módulo anterior para liberar esta aula.'); redirect('prova.php?id=' . $blk['id']); }
-    flash('err', 'Assista a aula anterior até o final para liberar esta.');
+    if (!empty($lesson['release_at']) && strtotime((string)$lesson['release_at']) > time()) { flash('info', 'Esta aula será liberada em ' . live_when($lesson['release_at']) . '.'); redirect('curso.php?id=' . $cid); }
+    flash('err', 'Conclua a aula anterior para liberar esta.');
     $nl = next_lesson($uid, $cid);
     redirect($nl && $nl['id'] != $lesson['id'] ? 'aula.php?id=' . $nl['id'] : 'curso.php?id=' . $cid);
 }
@@ -37,7 +38,15 @@ $prog = course_progress($uid, $cid);
 $bySec = [];
 foreach ($all as $l) $bySec[$l['module_id']][] = $l;
 $mods = q_all('SELECT * FROM modules WHERE course_id = ? ORDER BY position, id', [$cid]);
+$isLive = lesson_is_live($lesson);
+$liveState = $isLive ? live_state($lesson) : '';
+$liveTimes = $isLive ? live_times($lesson) : null;
+$isAdminUser = $u['role'] === 'admin';
+// aula ao vivo: a gravação só aparece depois do fim da transmissão (admin vê sempre)
 $embed = video_embed($lesson['video_url']);
+if ($isLive && $embed && !$isAdminUser && !live_replay_open($lesson)) $embed = null;
+$attended = $isLive ? q_val('SELECT joined_at FROM live_attendance WHERE user_id = ? AND lesson_id = ?', [$uid, $lesson['id']]) : null;
+$canEnter = $isLive && ($isOwner || $lesson['is_free']) && ($isAdminUser ? !empty($lesson['live_url']) : live_can_join($lesson));
 $materials = q_all('SELECT * FROM materials WHERE lesson_id = ? ORDER BY id', [$lesson['id']]);
 $comments = q_all('SELECT c.*, u.name, u.role FROM comments c JOIN users u ON u.id = c.user_id WHERE c.lesson_id = ? ORDER BY c.created_at', [$lesson['id']]);
 $top = []; $replies = [];
@@ -54,19 +63,42 @@ function render_comment(array $cm, array $replies, bool $isReply = false): void 
 
 $title = $lesson['title'];
 $withPlayer = (bool)$embed;
+$withLive = $isLive && $liveTimes;
 require ROOT . '/app/views/header.php';
 ?>
 <div class="player-layout">
   <div>
+    <?php if ($isLive): ?>
+    <div class="live-panel state-<?= e($liveState) ?>" id="live-panel"<?php if ($liveTimes): ?> data-now="<?= time() ?>" data-open="<?= $liveTimes['open'] ?>" data-start="<?= $liveTimes['start'] ?>" data-end="<?= $liveTimes['end'] ?>" data-close="<?= $liveTimes['close'] ?>"<?php endif; ?>>
+      <div class="live-kicker"><?php
+        echo ['unscheduled' => 'Aula ao vivo', 'upcoming' => '&#128197; Aula ao vivo agendada', 'soon' => '&#128308; Sala aberta', 'live' => '&#128308; AO VIVO AGORA', 'late' => '&#128308; Transmissão terminando', 'ended' => 'Aula ao vivo encerrada'][$liveState]; ?></div>
+      <h2><?= $lesson['starts_at'] ? e(live_when($lesson['starts_at'])) : 'Data a definir' ?></h2>
+      <?php if ($liveTimes): ?><p class="live-meta">Duração prevista: <?= e(fmt_workload((int)round(($liveTimes['end'] - $liveTimes['start']) / 60))) ?></p><p class="live-count" id="live-count"></p><?php endif; ?>
+      <div class="live-actions">
+        <?php if ($canEnter): ?>
+          <a class="btn btn-live" target="_blank" rel="noopener noreferrer" href="<?= e(url('ao-vivo.php?id=' . $lesson['id'])) ?>">&#127909; Entrar na aula ao vivo</a>
+        <?php elseif ($liveState === 'ended'): ?>
+          <span class="live-note"><?= $embed ? 'A gravação desta aula está logo abaixo.' : 'Esta aula já aconteceu. A gravação será publicada aqui, se o professor disponibilizar.' ?></span>
+        <?php elseif (empty($lesson['live_url'])): ?>
+          <span class="live-note">O professor ainda vai divulgar o link da sala. Ele aparecerá aqui 15 minutos antes do início.</span>
+        <?php elseif ($liveState === 'upcoming'): ?>
+          <button class="btn" disabled>O botão de entrada libera 15 min antes</button>
+        <?php else: ?><span class="live-note">Faça login com a conta matriculada para entrar.</span><?php endif; ?>
+        <?php if ($liveTimes && $liveState !== 'ended' && ($isOwner || $lesson['is_free'])): ?><a class="btn btn-ghost btn-sm" href="<?= e(url('aula_ics.php?id=' . $lesson['id'])) ?>">&#128197; Adicionar à minha agenda</a><?php endif; ?>
+      </div>
+      <?php if ($attended): ?><p class="live-presence">&#10003; Presença registrada em <?= e(date('d/m/Y \à\s H:i', strtotime((string)$attended))) ?></p><?php endif; ?>
+      <?php if ($isLive && $isAdminUser): ?><p class="hint" style="margin-top:8px">Modo administrador: você pode entrar a qualquer momento para testar o link.</p><?php endif; ?>
+    </div>
+    <?php endif; ?>
     <?php if ($embed): ?>
       <div class="video" id="player-wrap"><div class="stage" id="player" data-lesson="<?= (int)$lesson['id'] ?>" data-src="<?= e(url('video.php?id=' . $lesson['id'])) ?>" data-ping="<?= e(url('watch.php')) ?>"><div class="msg">Carregando vídeo...</div></div></div>
       <div class="watchbar" id="watchbar"><div class="track"><i id="watch-fill" style="width:<?= $isDone ? 100 : (int)($pcts[$lesson['id']] ?? 0) ?>%"></i></div><span id="watch-status"><?= $isDone ? '&#10003; Aula concluída' : ($isOwner ? 'Assista a aula inteira para liberar a próxima' : 'Aula de degustação') ?></span></div>
-    <?php else: ?>
+    <?php elseif (!$isLive): ?>
       <div class="video empty">Vídeo não disponível para esta aula.</div>
     <?php endif; ?>
     <div class="lesson-head">
       <div><small style="color:var(--muted)"><?= e($lesson['module_title']) ?></small><h1><?= e($lesson['title']) ?></h1></div>
-      <?php if (!$embed): ?>
+      <?php if (!$embed && !$isLive): ?>
       <button id="btn-complete" class="btn <?= $isDone ? 'btn-ghost' : '' ?>" data-lesson="<?= (int)$lesson['id'] ?>" data-done="<?= $isDone ? 1 : 0 ?>"
         data-url="<?= e(url('progresso.php')) ?>" data-next="<?= $next && (!$isOwner || ($openMap[$next['id']] ?? true)) && ($isOwner || $next['is_free']) ? e(url('aula.php?id=' . $next['id'])) : '' ?>">
         <?= $isDone ? '&#10003; Aula concluída' : 'Marcar como concluída' ?></button>
@@ -116,7 +148,7 @@ require ROOT . '/app/views/header.php';
         <a class="lesson-item <?= isset($done[$l['id']]) ? 'done' : '' ?> <?= $l['id'] == $lesson['id'] ? 'current' : '' ?>"
            href="<?= e(url($can ? 'aula.php?id=' . $l['id'] : 'curso.php?id=' . $cid)) ?>">
           <span class="dot"><?= $can ? (isset($done[$l['id']]) ? '&#10003;' : '') : '&#128274;' ?></span>
-          <span class="t"><?= e($l['title']) ?><?php if ($isOwner): $lp = isset($done[$l['id']]) ? 100 : (int)($pcts[$l['id']] ?? 0); ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
+          <span class="t"><?= e($l['title']) ?><?php if (lesson_is_live($l) && $l['starts_at']): ?><small class="live-mini">&#128308; <?= e(live_short($l['starts_at'])) ?></small><?php elseif (!empty($l['release_at']) && strtotime((string)$l['release_at']) > time()): ?><small class="live-mini">&#128197; libera <?= e(live_short($l['release_at'])) ?></small><?php endif; ?><?php if ($isOwner): $lp = isset($done[$l['id']]) ? 100 : (int)($pcts[$l['id']] ?? 0); ?><span class="lbar"><i style="width:<?= $lp ?>%"></i></span><?php endif; ?></span>
           <?php if ($isOwner): ?><small class="lpct"><?= $lp ?>%</small><?php endif; ?>
         </a>
       <?php endforeach; ?>
