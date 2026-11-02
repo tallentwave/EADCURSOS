@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
+if (is_app()) { http_response_code(403); exit('Compras não estão disponíveis no aplicativo.'); }
 $u = require_login();
 require_post();
 $c = course_by_id((int)($_POST['course_id'] ?? 0));

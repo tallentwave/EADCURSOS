@@ -15,7 +15,8 @@ android {
         versionCode 1
         versionName '1.0'
         buildConfigField 'String', 'SITE_URL', "\"${siteUrl}\""
-        buildConfigField 'boolean', 'SECURE_SCREEN', (project.findProperty('SECURE_SCREEN') ?: 'false').toString()
+        buildConfigField 'boolean', 'SECURE_SCREEN', (project.findProperty('SECURE_SCREEN') ?: 'true').toString()
+        buildConfigField 'boolean', 'ALLOW_DOC_CAPTURE', (project.findProperty('SECURE_ALLOW_DOCS') ?: 'true').toString()
         resValue 'string', 'app_name', appName
         manifestPlaceholders = [siteHost: siteHost, cleartext: (project.findProperty('ALLOW_HTTP') ?: 'false').toString()]
     }

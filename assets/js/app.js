@@ -30,6 +30,9 @@
     sel.addEventListener('change', apply); apply();
   });
 
+  // app Android: páginas do certificado/carteirinha podem ser capturadas (o resto fica protegido contra print)
+  if (document.body.classList.contains('allow-capture') && window.AndroidApp && window.AndroidApp.secure) window.AndroidApp.secure(false);
+
   // PWA: registra o service worker (só em https) para exibir a tela "sem conexão"
   var mf = document.querySelector('link[rel=manifest]');
   if (mf && 'serviceWorker' in navigator && location.protocol === 'https:') {

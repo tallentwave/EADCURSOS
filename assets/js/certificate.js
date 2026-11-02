@@ -7,6 +7,7 @@
   }
   function reset() { c.style.transform = 'none'; vp.style.width = ''; vp.style.height = ''; }
   fit();
+  if (window.AndroidApp && window.AndroidApp.secure) window.AndroidApp.secure(false);   // no app: certificado pode ser capturado/impresso
   window.addEventListener('resize', fit);
   window.addEventListener('beforeprint', reset);
   window.addEventListener('afterprint', fit);

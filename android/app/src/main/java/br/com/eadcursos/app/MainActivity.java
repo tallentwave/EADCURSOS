@@ -5,6 +5,7 @@ import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,9 +52,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        if (BuildConfig.SECURE_SCREEN) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        }
+        applySecure(true);
         baseHost = Uri.parse(BuildConfig.SITE_URL).getHost();
 
         root = new FrameLayout(this);
@@ -96,6 +95,11 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false; // iframes (YouTube/Vimeo) seguem normalmente
                 return handleUrl(request.getUrl());
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                applySecure(true);   // toda página nova começa protegida; só certificado/carteirinha pedem liberação
             }
 
             @Override
@@ -209,6 +213,13 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Liga/desliga a trava de print e gravação de tela (FLAG_SECURE). Só vale se SECURE_SCREEN=true. */
+    private void applySecure(boolean on) {
+        if (!BuildConfig.SECURE_SCREEN) return;
+        if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
     @SuppressWarnings("deprecation")
     private void immersive(boolean on) {
         getWindow().getDecorView().setSystemUiVisibility(on
@@ -230,6 +241,19 @@ public class MainActivity extends Activity {
                         .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                         .build();
                 pm.print(getString(R.string.app_name) + " - documento", adapter, attrs);
+            });
+        }
+
+        /**
+         * Certificado e carteirinha chamam secure(false) para o aluno poder capturar o documento.
+         * Só é aceito se SECURE_ALLOW_DOCS=true e se a página atual for do seu próprio site (nunca de um iframe/terceiro).
+         */
+        @JavascriptInterface
+        public void secure(boolean on) {
+            runOnUiThread(() -> {
+                if (on) { applySecure(true); return; }
+                Uri cur = Uri.parse(String.valueOf(web.getUrl()));
+                if (BuildConfig.ALLOW_DOC_CAPTURE && cur.getHost() != null && cur.getHost().equalsIgnoreCase(baseHost)) applySecure(false);
             });
         }
 

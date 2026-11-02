@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
+if (is_app()) { http_response_code(403); header('Content-Type: application/json'); exit('{"ok":false}'); }
 header('Content-Type: application/json');
 $u = current_user();
 if (!$u || $_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(403); echo '{"ok":false}'; exit; }

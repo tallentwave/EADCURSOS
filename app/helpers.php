@@ -187,3 +187,6 @@ function blob_decrypt(string $blob): ?string
     $pt = openssl_decrypt(substr($blob, 28), 'aes-256-gcm', hash('sha256', 'file:' . APP_KEY, true), OPENSSL_RAW_DATA, substr($blob, 0, 12), substr($blob, 12, 16));
     return $pt === false ? null : $pt;
 }
+
+// ---------- App Android: o app não vende; é só para quem já comprou fora ----------
+function is_app(): bool { return str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', ' EADApp/'); }

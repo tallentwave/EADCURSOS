@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
-$u = current_user();           // página pública: visitantes podem ver a apresentação do curso
+$u = current_user();
+if (is_app() && !$u) redirect('login.php');
+// página pública: visitantes podem ver a apresentação do curso
 $uid = $u ? (int)$u['id'] : 0;
 $c = course_by_id((int)($_GET['id'] ?? 0));
 if (!$c || ($c['status'] !== 'published' && (!$u || $u['role'] !== 'admin'))) { http_response_code(404); exit('Curso não encontrado.'); }
@@ -36,6 +38,8 @@ require ROOT . '/app/views/header.php';
       <?php elseif ($hasFinal || required_module_exams($cid)): ?><div class="meta">&#127942; Certificado: <?= e($certWhy) ?></div><?php endif; ?>
       <div class="bar" style="max-width:340px;margin-top:16px"><i style="width:<?= $prog['pct'] ?>%"></i></div>
       <div class="meta"><?= $prog['pct'] ?>% concluído</div>
+    <?php elseif (is_app()): ?>
+      <p class="meta">Este curso ainda não está liberado na sua conta. Se você já comprou, confirme se está usando o mesmo e-mail da compra ou fale com o suporte.</p>
     <?php elseif (!$u): ?>
       <span class="big-price"><?= (float)$c['price'] > 0 ? money($c['price']) : 'Grátis' ?></span>
       <a class="btn" href="<?= e(url('login.php?next=' . urlencode(BASE_URL_PATH . '/' . $nextUrl))) ?>"><?= (float)$c['price'] > 0 ? 'Entrar para comprar' : 'Entrar para começar' ?></a>

@@ -57,6 +57,6 @@ function course_card(array $c, bool $owned, ?int $pct = null): string
     $h .= '<div class="card-info"><strong>' . e($c['title']) . '</strong>';
     $h .= '<small>' . e($c['short_desc']) . '</small>';
     if ($owned && $pct !== null) $h .= '<div class="bar"><i style="width:' . $pct . '%"></i></div><small>' . $pct . '% concluído</small>';
-    elseif (!$owned) $h .= '<span class="price">' . ((float)$c['price'] > 0 ? money($c['price']) : 'Grátis') . '</span>';
+    elseif (!$owned && !is_app()) $h .= '<span class="price">' . ((float)$c['price'] > 0 ? money($c['price']) : 'Grátis') . '</span>';
     return $h . '</div></a>';
 }

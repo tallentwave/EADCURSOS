@@ -3,6 +3,8 @@ require __DIR__ . '/app/bootstrap.php';
 // Vitrine pública: qualquer visitante vê os cursos; ao entrar, aparecem progresso e "continue assistindo".
 $u = current_user();
 $uid = $u ? (int)$u['id'] : 0;
+$inApp = is_app();                       // no app só entra quem já comprou: sem vitrine pública
+if ($inApp && !$u) redirect('login.php');
 
 $courses = q_all('SELECT * FROM courses WHERE status = "published" ORDER BY featured DESC, id DESC');
 $owned = [];
@@ -11,6 +13,8 @@ if ($uid) {
     foreach ($courses as $c) if (has_access($uid, (int)$c['id'])) $owned[(int)$c['id']] = true;
     foreach ($owned as $cid => $_) $progress[$cid] = course_progress($uid, $cid)['pct'];
 }
+
+if ($inApp) $courses = array_values(array_filter($courses, fn($c) => isset($owned[(int)$c['id']])));   // app: só os cursos do aluno
 
 // "Continuar assistindo": cursos com progresso iniciado e não concluído, mais recente primeiro
 $continue = [];
@@ -68,7 +72,7 @@ require ROOT . '/app/views/header.php';
 <?php endif; ?>
 
 <?php if (!$courses): ?>
-  <div class="container"><div class="alert alert-info">Nenhum curso publicado ainda.</div></div>
+  <div class="container"><div class="alert alert-info"><?= $inApp ? 'Você ainda não tem cursos liberados. Se já comprou, confirme se está usando o mesmo e-mail da compra ou fale com o suporte.' : 'Nenhum curso publicado ainda.' ?></div></div>
 <?php endif; ?>
 
 <?php if ($lives): ?>

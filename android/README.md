@@ -29,20 +29,21 @@ o nome ou o endereço.
 | Botão *Imprimir / Salvar em PDF* do certificado | usa a impressão do Android (escolha "Salvar como PDF") |
 | PDF/PNG da carteirinha e dados LGPD | baixam para a pasta **Downloads** com notificação |
 | Enviar foto (carteirinha, assinatura, capas) | abre o seletor de arquivos/galeria do celular |
-| Pagamento Mercado Pago (PIX/cartão) | abre dentro do app; links `mercadopago://` abrem o app do Mercado Pago |
+| Pagamento Mercado Pago | não usado no app (vendas ficam fora); a regra ainda trata o checkout caso você reative |
 | Links do seu site em e-mails | abrem direto no app |
 | Sem internet | tela "Sem conexão" com botão *Tentar novamente* |
 | Botão voltar do Android | volta a página; na primeira, fecha o app |
 | Vídeo ao sair do app | pausa (o player também pausa ao ocultar a tela) |
+| Print / gravação de tela | **barrados** em todo o app (tela preta na captura e na lista de apps); certificado e carteirinha podem liberar (ver abaixo) |
+| Compra / preços / cupons | **não aparecem** no app: ele é só para quem já comprou fora (o servidor também recusa compras vindas do app) |
 
 O app se identifica ao servidor com o sufixo `EADApp/1.0` no *User-Agent* (útil se quiser esconder/mostrar algo só no app).
 
 ## Antes de publicar na Google Play (importante)
-- **Pagamentos**: a Play exige o **Google Play Billing** para vender conteúdo digital *dentro* do app, e cursos
-  online costumam cair nessa regra. Compra pelo Mercado Pago dentro do app pode causar **reprovação ou bloqueio**.
-  Opções: (a) distribuir o **APK direto** (site/WhatsApp) — sem essa regra; (b) publicar na Play só com
-  acesso para quem já comprou pelo site (esconder os botões de compra quando o *User-Agent* tiver `EADApp`).
-  Peça e eu faço o ajuste (b) no servidor.
+- **Pagamentos**: o app já **não vende nada** (sem preços, cupons nem botão de compra; é só para quem comprou fora),
+  que é o formato mais seguro para a Play. Mesmo assim a revisão da Play é decisão do Google: na descrição do app
+  diga que é "área de alunos para quem já adquiriu o curso" e forneça uma conta de teste para o revisor.
+  Distribuir o **APK direto** (site/WhatsApp) continua sendo a opção sem nenhuma revisão.
 - Exige conta de desenvolvedor (US$ 25, taxa única), política de privacidade (já existe em `/privacidade.php`)
   e o formulário de segurança de dados.
 - O app **não inclui notificações push** (aviso de aula ao vivo). Hoje o lembrete vai por e-mail e calendário (.ics).
@@ -50,8 +51,12 @@ O app se identifica ao servidor com o sufixo `EADApp/1.0` no *User-Agent* (útil
 ## Segurança
 - Só `https` (o app recusa `http`, salvo `ALLOW_HTTP=true` para testes).
 - Páginas de fora do seu site abrem fora do app; só o seu domínio e o checkout do Mercado Pago ficam dentro.
-- `SECURE_SCREEN=true` bloqueia print/gravação de tela dentro do app (ajuda a proteger os vídeos), mas também
-  impede o aluno de tirar print do certificado/carteirinha. Ele ainda pode baixar o PDF normalmente.
+- **Bloqueio de print** (`SECURE_SCREEN=true`, já vem ligado): o Android devolve tela preta em prints, gravação de tela,
+  espelhamento e na miniatura de apps recentes. Vale para o app inteiro, inclusive vídeos e provas.
+  Com `SECURE_ALLOW_DOCS=true` (padrão) apenas as telas do **certificado** e da **carteirinha** liberam o print,
+  para o aluno guardar/mostrar o documento. Quer travar tudo? Coloque `SECURE_ALLOW_DOCS=false`
+  (o aluno ainda baixa o PDF/PNG). Quer desligar o bloqueio? `SECURE_SCREEN=false`.
+  Limite honesto: isso barra captura feita pelo sistema; uma câmera filmando a tela de outro aparelho não é impedida.
 
 ## Roteiro de teste rápido (após instalar)
 1. Entrar com uma conta de aluno; rotacionar a tela; fechar e abrir (continua logado).

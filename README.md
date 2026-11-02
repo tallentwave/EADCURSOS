@@ -73,6 +73,7 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 ## Novidades da versão 9 — App Android e PWA
 - Pasta **`android/`**: projeto do app Android (casca que abre o seu site; guia completo em `android/README.md`). Basta editar `android/gradle.properties` (endereço do site, nome e ID) e gerar o APK no Android Studio. O app não foi compilado no ambiente de desenvolvimento: faça o primeiro build/teste em um celular antes de distribuir.
 - O site agora é um **PWA instalável** (`manifest.php`, `pwa-icon.php`, `sw.js`, `offline.html`): no Chrome do Android, *Adicionar à tela inicial*. Exige HTTPS.
+- **Modo app** (o app se identifica como `EADApp`): sem vitrine pública, preços, cupons nem compra (o servidor recusa `comprar.php` vindo do app); só aparecem os cursos do aluno. **Bloqueio de print/gravação** ligado no app (`SECURE_SCREEN`), com exceção opcional para certificado e carteirinha (`SECURE_ALLOW_DOCS`).
 - *Imprimir / Salvar em PDF* reconhece o app Android (ponte nativa de impressão) e a exportação de dados LGPD virou link de download (`perfil.php?export=1`).
 
 ### Limite honesto da proteção de vídeo

@@ -34,6 +34,7 @@ $me = q_one('SELECT photo, photo_consent_at FROM users WHERE id = ?', [$uid]);
 $hasPhoto = user_photo_bytes($me['photo']) !== null;
 $v = substr(md5((string)$me['photo'] . ($cert['id']) . setting('cert_theme') . setting('cert_logo') . setting('cert_signature') . setting('cert_signer_name')), 0, 8);
 $title = 'Carteirinha';
+$bodyClass = 'allow-capture';
 require ROOT . '/app/views/header.php';
 ?>
 <div class="container" style="max-width:980px">
