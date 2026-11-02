@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf" content="<?= e(csrf_token()) ?>">
 <title><?= e(($title ?? '') !== '' ? $title . ' · ' : '') . e(site_name()) ?></title>
+<meta name="theme-color" content="#07080c">
+<link rel="manifest" href="<?= e(url('manifest.php')) ?>">
+<link rel="apple-touch-icon" href="<?= e(url('pwa-icon.php?s=192')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
 <body class="<?= e($bodyClass ?? '') ?>">

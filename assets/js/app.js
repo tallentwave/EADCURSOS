@@ -12,7 +12,7 @@
     var t = e.target.closest ? e.target.closest('[data-confirm-click],[data-print],[data-back]') : null;
     if (!t) return;
     if (t.hasAttribute('data-confirm-click') && !window.confirm(t.getAttribute('data-confirm-click'))) { e.preventDefault(); return; }
-    if (t.hasAttribute('data-print')) { e.preventDefault(); window.print(); }
+    if (t.hasAttribute('data-print')) { e.preventDefault(); if (window.AndroidApp && window.AndroidApp.print) window.AndroidApp.print(); else window.print(); }
     if (t.hasAttribute('data-back') && window.history.length > 1) { e.preventDefault(); window.history.back(); }
   });
   document.addEventListener('change', function (e) {
@@ -29,6 +29,12 @@
     }
     sel.addEventListener('change', apply); apply();
   });
+
+  // PWA: registra o service worker (só em https) para exibir a tela "sem conexão"
+  var mf = document.querySelector('link[rel=manifest]');
+  if (mf && 'serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register(mf.href.replace('manifest.php', 'sw.js')).catch(function () {});
+  }
 
   // marcar aula como concluída (AJAX)
   var btn = document.getElementById('btn-complete');

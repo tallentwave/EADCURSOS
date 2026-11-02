@@ -15,6 +15,7 @@
     var b = e.target.closest ? e.target.closest('[data-print]') : null;
     if (!b) return;
     e.preventDefault();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { window.print(); }); else window.print();
+    var go = function () { if (window.AndroidApp && window.AndroidApp.print) window.AndroidApp.print(); else window.print(); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
   });
 })();

@@ -2,6 +2,13 @@
 require __DIR__ . '/app/bootstrap.php';
 $u = require_login();
 $uid = (int)$u['id'];
+if (($_GET['export'] ?? '') === '1') { // somente leitura dos próprios dados; o navegador de outro site não consegue ler a resposta
+    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Disposition: attachment; filename="meus-dados.json"');
+    header('Cache-Control: no-store');
+    echo json_encode(export_user_data($uid), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $row = q_one('SELECT * FROM users WHERE id = ?', [$uid]);
@@ -87,8 +94,7 @@ $st = ['pending' => ['Pendente', 'warn'], 'paid' => ['Pago', 'ok'], 'cancelled' 
 
   <h2 style="margin:28px 0 12px">Privacidade e meus dados (LGPD)</h2>
   <div class="grid2">
-    <form class="formbox" method="post"><?= csrf_field() ?><input type="hidden" name="action" value="export">
-      <h3 style="margin:14px 0 6px;color:var(--gold)">Baixar meus dados</h3><p class="hint">Cópia em JSON de tudo o que guardamos sobre você.</p><br><button class="btn btn-ghost btn-sm">Baixar arquivo</button></form>
+    <div class="formbox"><h3 style="margin:14px 0 6px;color:var(--gold)">Baixar meus dados</h3><p class="hint">Cópia em JSON de tudo o que guardamos sobre você.</p><br><a class="btn btn-ghost btn-sm" href="<?= e(url('perfil.php?export=1')) ?>">Baixar arquivo</a></div>
     <?php if ($u['role'] !== 'admin'): ?>
     <form class="formbox" method="post" data-confirm="Esta ação é definitiva. Excluir sua conta, progresso e certificados?"><?= csrf_field() ?><input type="hidden" name="action" value="delete_account">
       <h3 style="margin:14px 0 6px;color:var(--danger)">Excluir minha conta</h3><p class="hint">Remove seus dados pessoais, progresso, comentários e certificados. Registros de pedidos são mantidos de forma anonimizada (obrigação fiscal).</p>

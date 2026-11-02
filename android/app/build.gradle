@@ -1,0 +1,28 @@
+plugins { id 'com.android.application' }
+
+def siteUrl  = (project.findProperty('SITE_URL') ?: 'https://seudominio.com.br').toString().trim().replaceAll('/+$', '')
+def siteHost = new URI(siteUrl).host
+def appName  = (project.findProperty('APP_NAME') ?: 'EAD').toString().replace("'", "\\'")
+
+android {
+    namespace 'br.com.eadcursos.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId (project.findProperty('APP_ID') ?: 'br.com.eadcursos.app').toString()
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+        buildConfigField 'String', 'SITE_URL', "\"${siteUrl}\""
+        buildConfigField 'boolean', 'SECURE_SCREEN', (project.findProperty('SECURE_SCREEN') ?: 'false').toString()
+        resValue 'string', 'app_name', appName
+        manifestPlaceholders = [siteHost: siteHost, cleartext: (project.findProperty('ALLOW_HTTP') ?: 'false').toString()]
+    }
+    buildFeatures { buildConfig true }
+    buildTypes { release { minifyEnabled false } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

@@ -70,6 +70,11 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Conteúdo agendado**: aulas gravadas aceitam *Liberar em (data/hora)*; antes disso aparecem com cadeado e a data.
 - **Logo**: menor no topo (28 px) e sem logo em destaque na home.
 
+## Novidades da versão 9 — App Android e PWA
+- Pasta **`android/`**: projeto do app Android (casca que abre o seu site; guia completo em `android/README.md`). Basta editar `android/gradle.properties` (endereço do site, nome e ID) e gerar o APK no Android Studio. O app não foi compilado no ambiente de desenvolvimento: faça o primeiro build/teste em um celular antes de distribuir.
+- O site agora é um **PWA instalável** (`manifest.php`, `pwa-icon.php`, `sw.js`, `offline.html`): no Chrome do Android, *Adicionar à tela inicial*. Exige HTTPS.
+- *Imprimir / Salvar em PDF* reconhece o app Android (ponte nativa de impressão) e a exportação de dados LGPD virou link de download (`perfil.php?export=1`).
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar a regra de assistir a aula inteira. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 
