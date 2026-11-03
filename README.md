@@ -76,6 +76,11 @@ PHP 8+ · MySQL/MariaDB · sem Composer · tema Preto + Dourado + Azul-marinho.
 - **Modo app** (o app se identifica como `EADApp`): sem vitrine pública, preços, cupons nem compra (o servidor recusa `comprar.php` vindo do app); só aparecem os cursos do aluno. **Bloqueio de print/gravação** ligado no app (`SECURE_SCREEN`), com exceção opcional para certificado e carteirinha (`SECURE_ALLOW_DOCS`).
 - *Imprimir / Salvar em PDF* reconhece o app Android (ponte nativa de impressão) e a exportação de dados LGPD virou link de download (`perfil.php?export=1`).
 
+## Novidades da versão 10 — App Android via Expo/EAS (sem Android Studio)
+- Pasta **`expo-app/`**: app Android em Expo (React Native + WebView), gerado **na nuvem** com `eas build -p android --profile preview`, sem Android Studio. Guia em `expo-app/README.md`. Mesmas funções do app nativo: bloqueio de print (com exceção para certificado/carteirinha), impressão/PDF, downloads, links externos, tela sem conexão e modo sem venda.
+- Validado no ambiente de desenvolvimento: `expo-doctor` (20/20) e empacotamento do app Android sem erros. O APK em si é gerado pelo EAS, na sua conta.
+- `.htaccess`: libera as fontes públicas para carregar de fora do site (necessário para imprimir o certificado pelo app).
+
 ### Limite honesto da proteção de vídeo
 Com YouTube/Vimeo o navegador do aluno precisa receber o ID do vídeo para tocá-lo; por isso é impossível impedir 100% que alguém experiente o descubra nas ferramentas do navegador ou grave a tela. As travas acima barram o uso comum e o relógio no servidor impede burlar a regra de assistir a aula inteira. Para reduzir o risco de link vazado, use vídeos **não listados** no YouTube ou, melhor, **Vimeo com restrição de domínio** (privacidade → "Onde incorporar" → apenas o seu site): assim o vídeo não toca fora da sua plataforma.
 

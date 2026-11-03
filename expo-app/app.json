@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Minha EAD",
+    "slug": "minha-ead",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#07080C",
+    "android": {
+      "package": "br.com.eadcursos.app",
+      "versionCode": 1,
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "backgroundColor": "#07080C"
+      }
+    },
+    "extra": {
+      "siteUrl": "https://seudominio.com.br",
+      "secureScreen": true,
+      "allowDocCapture": true
+    }
+  }
+}
